@@ -1,0 +1,231 @@
+<!-- server/backend/public/results.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Veridex — Intelligence Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/app-status.css" />
+  <link rel="stylesheet" href="/css/results.css" />
+</head>
+<body>
+
+  <!-- Navbar (same structure as index.html so the brand stays consistent) -->
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-left">
+        <svg class="brand-mark" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="40" height="40" rx="10" fill="url(#g1)"/>
+          <path d="M12 20L17.5 25.5L28 14" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#4F46E5"/>
+              <stop offset="1" stop-color="#7C6CFF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="brand-text">
+          <span class="navbar-brand">Veridex</span>
+          <span class="navbar-tagline">Failure Prediction AI</span>
+        </div>
+      </div>
+
+      <div class="navbar-links">
+        <a href="index.html" class="nav-item">Project Input</a>
+        <span class="nav-item active">Intelligence Report</span>
+      </div>
+
+      <div class="navbar-right">
+        <div class="profile-avatar" title="Guest User">V</div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="vrx-shell">
+
+    <!-- Empty state -->
+    <div id="emptyState" class="vrx-empty hidden">
+      <p>No analysis found for this session.</p>
+      <a href="index.html" class="vrx-btn-primary">Start a New Analysis</a>
+    </div>
+
+    <div id="reportRoot" class="hidden">
+
+      <!-- Fallback notice -->
+      <div id="fallbackBanner" class="vrx-fallback hidden">
+        <span class="vrx-fallback-dot"></span>
+        Live AI analysis was unavailable, so this report uses estimated data-driven figures based on your inputs.
+      </div>
+
+      <!-- Report meta header -->
+      <header class="vrx-meta-header">
+        <div class="vrx-meta-main">
+          <p class="vrx-eyebrow">Market &amp; Competitor Intelligence Engine</p>
+          <h1 id="projectName" class="vrx-report-title">—</h1>
+          <div id="tagRow" class="vrx-tag-row"></div>
+        </div>
+        <div class="vrx-meta-stats">
+          <div class="vrx-meta-stat">
+            <span class="vrx-meta-label">Sector</span>
+            <strong id="metaSector">—</strong>
+          </div>
+          <div class="vrx-meta-stat">
+            <span class="vrx-meta-label">Business Model</span>
+            <strong id="metaModel">—</strong>
+          </div>
+          <div class="vrx-meta-stat">
+            <span class="vrx-meta-label">Analyzed</span>
+            <strong id="metaDate">—</strong>
+          </div>
+        </div>
+        <a href="index.html" class="vrx-btn-secondary">+ New Analysis</a>
+      </header>
+
+      <!-- No-analysis notice (shown only if analysis failed / is null) -->
+      <div id="noAnalysisNotice" class="vrx-report-card vrx-notice hidden">
+        <p id="noAnalysisText">Analysis is not available for this project yet.</p>
+      </div>
+
+      <div id="capabilitiesRoot">
+
+        <!-- Capability 01 — Target Market Characteristics -->
+        <section class="vrx-capability">
+          <div class="vrx-capability-head">
+            <span class="vrx-cap-num">01</span>
+            <div>
+              <h2>Target Market Characteristics</h2>
+              <p class="vrx-cap-sub">Audience profile, market maturity, and market sizing across TAM, SAM &amp; SOM.</p>
+            </div>
+          </div>
+
+          <p id="marketOverview" class="vrx-overview">—</p>
+
+          <div class="vrx-metrics-grid" id="metricsGrid"></div>
+
+          <div class="vrx-two-col">
+            <div class="vrx-panel">
+              <h3 class="vrx-panel-title">Market Growth (Past 5 Years)</h3>
+              <p class="vrx-panel-sub">Historical market size trend leading up to today</p>
+              <p id="trajectoryNote" class="vrx-chart-note hidden"></p>
+              <div id="trajectoryBars" class="vrx-trend-bars"></div>
+            </div>
+
+            <div class="vrx-panel">
+              <h3 class="vrx-panel-title">Audience &amp; Maturity</h3>
+              <div class="vrx-field">
+                <span class="vrx-field-label">Audience Profile</span>
+                <p id="audienceProfile">—</p>
+              </div>
+              <div class="vrx-field">
+                <span class="vrx-field-label">Market Maturity</span>
+                <p><span id="marketMaturity" class="vrx-badge vrx-badge-neutral">—</span></p>
+              </div>
+              <div class="vrx-field">
+                <span class="vrx-field-label">Key Drivers</span>
+                <ul id="keyDriversList" class="vrx-plain-list"></ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Capability 02 — Key Competitors & Industry Challenges -->
+        <section class="vrx-capability">
+          <div class="vrx-capability-head">
+            <span class="vrx-cap-num">02</span>
+            <div>
+              <h2>Key Competitors &amp; Industry Challenges</h2>
+              <p class="vrx-cap-sub">Estimated positioning against identified competitors and the friction points of this industry.</p>
+            </div>
+          </div>
+
+          <h3 class="vrx-panel-title vrx-panel-title-loose">Competitor Landscape</h3>
+          <div id="competitorGrid" class="vrx-competitor-grid"></div>
+
+          <div class="vrx-panel vrx-panel-warn">
+            <h3 class="vrx-panel-title">Industry Challenges</h3>
+            <ul id="challengesList" class="vrx-icon-list vrx-icon-list-warn"></ul>
+          </div>
+        </section>
+
+        <!-- Capability 03 — Market Opportunities & Growth Potential -->
+        <section class="vrx-capability">
+          <div class="vrx-capability-head">
+            <span class="vrx-cap-num">03</span>
+            <div>
+              <h2>Market Opportunities &amp; Growth Potential</h2>
+              <p class="vrx-cap-sub">Where the opening is, how ready this project is to capture it, and what to do next.</p>
+            </div>
+          </div>
+
+          <div class="vrx-two-col">
+            <div class="vrx-panel vrx-growth-panel">
+              <h3 class="vrx-panel-title">Growth Potential Score</h3>
+              <div class="vrx-growth-score-row">
+                <div class="vrx-growth-score-circle" id="growthScoreCircle">
+                  <span id="growthScoreValue">0</span>
+                  <span class="vrx-growth-score-max">/ 100</span>
+                </div>
+                <p id="growthSummary" class="vrx-growth-summary">—</p>
+              </div>
+              <div id="readinessBars" class="vrx-readiness-bars"></div>
+            </div>
+
+            <div class="vrx-panel vrx-panel-good">
+              <h3 class="vrx-panel-title">Market Opportunities</h3>
+              <ul id="opportunitiesList" class="vrx-icon-list vrx-icon-list-good"></ul>
+            </div>
+          </div>
+
+          <div class="vrx-panel vrx-panel-accent">
+            <h3 class="vrx-panel-title">Recommendations</h3>
+            <ul id="suggestionsList" class="vrx-icon-list vrx-icon-list-accent"></ul>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer (same structure as index.html so the brand stays consistent) -->
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <div class="site-footer-brand">
+        <svg class="brand-mark brand-mark-sm" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="40" height="40" rx="10" fill="url(#g2)"/>
+          <path d="M12 20L17.5 25.5L28 14" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="g2" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#4F46E5"/>
+              <stop offset="1" stop-color="#7C6CFF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div>
+          <span class="site-footer-brand-name">Veridex</span>
+          <p class="site-footer-tagline">Failure Prediction AI — Startup &amp; Project Risk Analyzer</p>
+        </div>
+      </div>
+
+      <nav class="site-footer-links" aria-label="Footer navigation">
+        <a href="index.html">Project Input</a>
+        <a href="results.html">Intelligence Report</a>
+      </nav>
+
+      <div class="site-footer-stack">
+        <span class="site-footer-label">Built with</span>
+        <span class="site-footer-tech">Node.js &middot; Express &middot; PostgreSQL &middot; Groq AI</span>
+      </div>
+    </div>
+
+    <div class="site-footer-bottom">
+      <span>&copy; 2026 Veridex. Built for the Infosys Springboard internship program.</span>
+    </div>
+  </footer>
+
+  <script src="/js/results.js"></script>
+</body>
+</html>

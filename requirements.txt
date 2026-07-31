@@ -1,0 +1,37 @@
+# Veridex — Requirements
+# Note: This is a Node.js project, so dependencies are normally managed via
+# package.json + npm install. This file lists the same information in plain
+# text as requested, plus the system-level software needed to run the app.
+
+## System Requirements
+Node.js >= 18.x
+npm >= 9.x
+PostgreSQL >= 13 (developed against PostgreSQL 17)
+pgAdmin 4 (recommended, for database management)
+
+## Runtime Dependencies (see package.json for exact ranges)
+axios ^1.7.2         - HTTP client used to call the Groq API
+cors ^2.8.5          - Cross-Origin Resource Sharing middleware
+dotenv ^16.4.5       - Loads environment variables from .env
+express ^4.19.2      - Web server framework
+pg ^8.12.0           - PostgreSQL client for Node.js
+
+## Development Dependencies
+nodemon ^3.1.4       - Auto-restarts server on file changes during development
+
+## Environment Variables Required (set in .env, not committed to Git)
+PORT          - Port the Express server runs on (e.g. 5000)
+GROQ_API_KEY  - API key for Groq (https://console.groq.com)
+PGUSER        - PostgreSQL username
+PGPASSWORD    - PostgreSQL password
+PGDATABASE    - PostgreSQL database name (failure_prediction_ai)
+PGHOST        - PostgreSQL host (e.g. localhost)
+PGPORT        - PostgreSQL port (default 5432)
+
+## Installation
+Run the following from the server/backend/ directory (where package.json lives):
+
+    npm install
+
+This reads package.json and installs all runtime + dev dependencies listed
+above automatically. You do not need to install packages individually.

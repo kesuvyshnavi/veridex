@@ -1,0 +1,251 @@
+<!-- server/backend/public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Veridex — Project Input</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/app-status.css" />
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-left">
+        <svg class="brand-mark" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="40" height="40" rx="10" fill="url(#g1)"/>
+          <path d="M12 20L17.5 25.5L28 14" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#4F46E5"/>
+              <stop offset="1" stop-color="#7C6CFF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="brand-text">
+          <span class="navbar-brand">Veridex</span>
+          <span class="navbar-tagline">Failure Prediction AI</span>
+        </div>
+      </div>
+
+      <div class="navbar-links">
+        <span class="nav-item active">Project Input</span>
+      </div>
+
+      <div class="navbar-right">
+        <div class="profile-avatar" title="Guest User">V</div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Layout -->
+  <div class="app-shell">
+
+    <!-- Left brand panel -->
+    <aside class="brand-panel">
+      <div class="brand-glow"></div>
+      <div class="brand-panel-inner">
+        <p class="page-eyebrow eyebrow-light">Startup &amp; Project Risk Analyzer</p>
+        <h1 class="hero-title">Know the risk before you build.</h1>
+        <p class="hero-subtitle">Veridex studies your startup's market, competitors, and positioning with AI — so you validate direction before spending time and budget.</p>
+
+        <ul class="hero-steps">
+          <li>
+            <span class="step-icon">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 4V16M12 4L7 9M12 4L17 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16V18C4 19.1046 4.89543 20 6 20H18C19.1046 20 20 19.1046 20 18V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <div>
+              <strong>Submit your project</strong>
+              <p>Share your startup or project details through the form.</p>
+            </div>
+          </li>
+          <li>
+            <span class="step-icon">
+              <svg viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="6" rx="7" ry="3" stroke="currentColor" stroke-width="2"/><path d="M5 6V18C5 19.6569 8.13401 21 12 21C15.866 21 19 19.6569 19 18V6" stroke="currentColor" stroke-width="2"/><path d="M5 12C5 13.6569 8.13401 15 12 15C15.866 15 19 13.6569 19 12" stroke="currentColor" stroke-width="2"/></svg>
+            </span>
+            <div>
+              <strong>Securely stored</strong>
+              <p>Your data is saved to a PostgreSQL database instantly.</p>
+            </div>
+          </li>
+          <li>
+            <span class="step-icon">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 3L14 9L20 11L14 13L12 19L10 13L4 11L10 9L12 3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+            </span>
+            <div>
+              <strong>AI analysis generated</strong>
+              <p>Get market size, competitors, opportunities &amp; risks.</p>
+            </div>
+          </li>
+        </ul>
+
+        <div class="brand-panel-footer">
+          <span>Built with Node.js &middot; PostgreSQL &middot; Groq AI</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Right content panel -->
+    <main class="content-panel">
+      <div class="content-inner">
+
+        <div class="page-head">
+          <h2 class="page-title">Project Submission</h2>
+          <p class="page-subtitle">Fill in your project details below to generate your analysis.</p>
+        </div>
+
+        <form id="projectForm" class="project-form" novalidate>
+
+          <div class="form-group">
+            <label for="project_name">Startup / Project Name</label>
+            <input type="text" id="project_name" name="project_name" placeholder="e.g. EcoCart" />
+            <span class="error-msg" id="err_project_name"></span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="industry">Industry / Sector</label>
+              <select id="industry" name="industry">
+                <option value="">-- Select Industry --</option>
+                <option value="Technology">Technology</option>
+                <option value="Healthcare">Healthcare</option>
+                <option value="Finance">Finance</option>
+                <option value="E-commerce">E-commerce</option>
+                <option value="Education">Education</option>
+                <option value="Agriculture">Agriculture</option>
+                <option value="Manufacturing">Manufacturing</option>
+                <option value="Other">Other</option>
+              </select>
+              <span class="error-msg" id="err_industry"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="business_model">Business Model</label>
+              <select id="business_model" name="business_model">
+                <option value="">-- Select Business Model --</option>
+                <option value="B2B">B2B</option>
+                <option value="B2C">B2C</option>
+                <option value="B2B2C">B2B2C</option>
+                <option value="Marketplace">Marketplace</option>
+                <option value="SaaS">SaaS</option>
+                <option value="D2C">D2C</option>
+                <option value="Other">Other</option>
+              </select>
+              <span class="error-msg" id="err_business_model"></span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="target_market">Target Market</label>
+            <select id="target_market" name="target_market">
+              <option value="">-- Select Target Market --</option>
+              <option value="Local">Local</option>
+              <option value="National">National</option>
+              <option value="International">International</option>
+              <option value="Niche">Niche</option>
+              <option value="Mass Market">Mass Market</option>
+            </select>
+            <span class="error-msg" id="err_target_market"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="budget">Budget</label>
+            <div class="budget-input-group">
+              <select id="currency" name="currency" class="currency-prefix" title="Currency">
+                <option value="INR">₹ INR</option>
+                <option value="USD">$ USD</option>
+                <option value="EUR">€ EUR</option>
+                <option value="GBP">£ GBP</option>
+                <option value="AED">AED</option>
+              </select>
+              <select id="budget" name="budget" class="budget-select">
+                <option value="">-- Select Budget Range --</option>
+              </select>
+            </div>
+            <span class="error-msg" id="err_budget"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="description">Project Description</label>
+            <textarea id="description" name="description" rows="5" placeholder="Describe your project in at least 20 characters..."></textarea>
+            <span class="error-msg" id="err_description"></span>
+          </div>
+
+          <button type="submit" id="submitBtn" class="submit-btn">
+            <span>Analyze Project</span>
+          </button>
+        </form>
+
+        <!-- Submission / analysis status flow (replaces the old bare spinner) -->
+        <div id="statusBox" class="status-box hidden">
+          <ul class="status-steps">
+            <li id="stepSubmit" class="status-step">
+              <span class="status-step-icon" aria-hidden="true"></span>
+              <span class="status-step-text">Submitting your project…</span>
+            </li>
+            <li id="stepAnalyze" class="status-step">
+              <span class="status-step-icon" aria-hidden="true"></span>
+              <span class="status-step-text">Analysing market &amp; competitors…</span>
+            </li>
+          </ul>
+
+          <div id="statusComplete" class="status-complete hidden">
+            <p id="statusCompleteText" class="status-complete-text">Your report is ready.</p>
+            <button type="button" id="viewAnalysisBtn" class="submit-btn">
+              <span>View Analysis</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Server-side error message -->
+        <div id="formErrorBox" class="form-error-box hidden"></div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <div class="site-footer-brand">
+        <svg class="brand-mark brand-mark-sm" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="40" height="40" rx="10" fill="url(#g2)"/>
+          <path d="M12 20L17.5 25.5L28 14" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="g2" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#4F46E5"/>
+              <stop offset="1" stop-color="#7C6CFF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div>
+          <span class="site-footer-brand-name">Veridex</span>
+          <p class="site-footer-tagline">Failure Prediction AI — Startup &amp; Project Risk Analyzer</p>
+        </div>
+      </div>
+
+      <nav class="site-footer-links" aria-label="Footer navigation">
+        <a href="index.html">Project Input</a>
+        <a href="results.html">Intelligence Report</a>
+      </nav>
+
+      <div class="site-footer-stack">
+        <span class="site-footer-label">Built with</span>
+        <span class="site-footer-tech">Node.js &middot; Express &middot; PostgreSQL &middot; Groq AI</span>
+      </div>
+    </div>
+
+    <div class="site-footer-bottom">
+      <span>&copy; 2026 Veridex. Built for the Infosys Springboard internship program.</span>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>
