@@ -4,6 +4,7 @@ const path = require('path');
 require('dotenv').config();
 
 const projectRoutes = require('./routes/projectRoutes');
+const riskRoutes = require('./routes/riskRoutes');
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // API routes
 app.use('/api/projects', projectRoutes);
+app.use('/api/risk-analysis', riskRoutes);
 
 // Fallback: serve index.html for the root route
 app.get('/', (req, res) => {

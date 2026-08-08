@@ -1,0 +1,389 @@
+/* server/backend/public/css/risk.css
+   Styles for the Risk Assessment, SWOT & Feasibility engine (risk.html).
+   Shares the "vrx-" design tokens defined in results.css (same brand,
+   same fonts/colors) but introduces its own visual identity — an arc
+   gauge instead of a donut, and a four-quadrant SWOT grid — so this page
+   reads as its own section rather than a re-skin of the market report. */
+
+.rsk-shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 40px 24px 96px;
+  font-family: var(--vrx-font-body);
+  color: var(--vrx-ink);
+}
+
+/* ---------- section headers (reused pattern from results.css) ---------- */
+.rsk-section {
+  margin-bottom: 56px;
+}
+
+.rsk-section-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.rsk-section-head h2 {
+  font-family: var(--vrx-font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.rsk-section-sub {
+  color: var(--vrx-muted);
+  font-size: 0.9rem;
+  margin: 0;
+  max-width: 640px;
+}
+
+/* ---------- arc gauge (Overall Risk Score / Feasibility %) ---------- */
+.rsk-gauge-row {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.rsk-gauge {
+  --pct: 0;
+  width: 168px;
+  height: 96px;
+  position: relative;
+  flex: none;
+}
+
+.rsk-gauge svg { width: 100%; height: 100%; overflow: visible; }
+
+.rsk-gauge-track { stroke: #EEF0F6; }
+
+.rsk-gauge-fill {
+  stroke: var(--rsk-gauge-color, var(--vrx-indigo));
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.4s ease;
+}
+
+.rsk-gauge-center {
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+.rsk-gauge-value {
+  font-family: var(--vrx-font-display);
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1;
+  display: block;
+}
+
+.rsk-gauge-suffix {
+  font-family: var(--vrx-font-mono);
+  font-size: 0.65rem;
+  color: var(--vrx-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.rsk-gauge-copy { flex: 1; min-width: 220px; }
+
+.rsk-gauge-label-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.rsk-level-badge {
+  font-family: var(--vrx-font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 11px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.rsk-level-low { background: var(--vrx-good-bg); color: var(--vrx-good); }
+.rsk-level-moderate { background: #FFFBEB; color: #B45309; }
+.rsk-level-high { background: #FFF0E6; color: #C2410C; }
+.rsk-level-critical { background: var(--vrx-bad-bg); color: var(--vrx-bad); }
+
+.rsk-gauge-copy p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--vrx-muted);
+  line-height: 1.55;
+}
+
+/* ---------- risk category cards ---------- */
+.rsk-category-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.rsk-category-card {
+  background: var(--vrx-panel);
+  border: 1px solid var(--vrx-border);
+  border-top: 3px solid var(--rsk-cat-color, var(--vrx-indigo));
+  border-radius: 14px;
+  padding: 16px 16px 18px;
+}
+
+.rsk-category-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.rsk-category-name {
+  font-family: var(--vrx-font-display);
+  font-weight: 700;
+  font-size: 0.86rem;
+}
+
+.rsk-category-score {
+  font-family: var(--vrx-font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--rsk-cat-color, var(--vrx-indigo));
+}
+
+.rsk-category-track {
+  height: 6px;
+  border-radius: 999px;
+  background: #EEF0F6;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.rsk-category-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--rsk-cat-color, var(--vrx-indigo));
+}
+
+.rsk-category-factors {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rsk-category-factors li {
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--vrx-muted);
+  padding-left: 14px;
+  position: relative;
+}
+
+.rsk-category-factors li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--rsk-cat-color, var(--vrx-indigo));
+}
+
+/* ---------- SWOT quadrant grid ---------- */
+.rsk-swot-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.rsk-swot-card {
+  border-radius: 14px;
+  padding: 20px 22px;
+  border: 1px solid var(--vrx-border);
+}
+
+.rsk-swot-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.rsk-swot-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  color: #fff;
+  font-family: var(--vrx-font-display);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.rsk-swot-head h3 {
+  font-family: var(--vrx-font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.rsk-swot-card ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.rsk-swot-card li {
+  font-size: 0.87rem;
+  line-height: 1.5;
+  padding-left: 16px;
+  position: relative;
+}
+
+.rsk-swot-card li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+}
+
+.rsk-swot-strengths { background: var(--vrx-good-bg); border-color: #CDF0DA; }
+.rsk-swot-strengths .rsk-swot-icon { background: var(--vrx-good); }
+.rsk-swot-strengths li::before { background: var(--vrx-good); }
+
+.rsk-swot-weaknesses { background: var(--vrx-bad-bg); border-color: #F8CFCF; }
+.rsk-swot-weaknesses .rsk-swot-icon { background: var(--vrx-bad); }
+.rsk-swot-weaknesses li::before { background: var(--vrx-bad); }
+
+.rsk-swot-opportunities { background: var(--vrx-info-bg); border-color: #CBDBFC; }
+.rsk-swot-opportunities .rsk-swot-icon { background: var(--vrx-info); }
+.rsk-swot-opportunities li::before { background: var(--vrx-info); }
+
+.rsk-swot-threats { background: var(--vrx-warn-bg); border-color: #FCEAC1; }
+.rsk-swot-threats .rsk-swot-icon { background: var(--vrx-warn); }
+.rsk-swot-threats li::before { background: var(--vrx-warn); }
+
+/* ---------- feasibility ---------- */
+.rsk-feasibility-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.rsk-panel {
+  background: var(--vrx-panel);
+  border: 1px solid var(--vrx-border);
+  border-radius: 14px;
+  padding: 20px 22px;
+}
+
+.rsk-verdict-badge {
+  display: inline-block;
+  font-family: var(--vrx-font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+  margin-bottom: 14px;
+}
+
+.rsk-breakdown-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rsk-breakdown-row {
+  display: grid;
+  grid-template-columns: 150px 1fr 36px;
+  align-items: center;
+  gap: 10px;
+}
+
+.rsk-breakdown-label {
+  font-size: 0.8rem;
+  color: var(--vrx-muted);
+}
+
+.rsk-breakdown-track {
+  height: 8px;
+  border-radius: 999px;
+  background: #EEF0F6;
+  overflow: hidden;
+}
+
+.rsk-breakdown-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--vrx-indigo), var(--vrx-indigo-light));
+}
+
+.rsk-breakdown-value {
+  font-family: var(--vrx-font-mono);
+  font-size: 0.76rem;
+  text-align: right;
+  color: var(--vrx-muted);
+}
+
+.rsk-recommend-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rsk-recommend-list li {
+  font-size: 0.9rem;
+  line-height: 1.55;
+  padding: 10px 14px 10px 34px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.6);
+  position: relative;
+}
+
+.rsk-recommend-list li::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 15px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--vrx-indigo);
+}
+
+.rsk-panel-accent { background: var(--vrx-indigo-50); border-color: #DCE0FF; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 960px) {
+  .rsk-category-grid { grid-template-columns: repeat(2, 1fr); }
+  .rsk-swot-grid { grid-template-columns: 1fr; }
+  .rsk-feasibility-layout { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .rsk-shell { padding: 24px 16px 64px; }
+  .rsk-category-grid { grid-template-columns: 1fr 1fr; }
+  .rsk-breakdown-row { grid-template-columns: 100px 1fr 30px; }
+}

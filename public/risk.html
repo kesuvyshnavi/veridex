@@ -1,0 +1,247 @@
+<!-- server/backend/public/risk.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Veridex — Risk Assessment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/app-status.css" />
+  <link rel="stylesheet" href="/css/results.css" />
+  <link rel="stylesheet" href="/css/risk.css" />
+</head>
+<body>
+
+  <!-- Navbar (same structure as index.html / results.html so the brand stays consistent) -->
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-left">
+        <svg class="brand-mark" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="40" height="40" rx="10" fill="url(#g1)"/>
+          <path d="M12 20L17.5 25.5L28 14" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#4F46E5"/>
+              <stop offset="1" stop-color="#7C6CFF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="brand-text">
+          <span class="navbar-brand">Veridex</span>
+          <span class="navbar-tagline">Failure Prediction AI</span>
+        </div>
+      </div>
+
+      <div class="navbar-links">
+        <a href="index.html" class="nav-item">Project Input</a>
+        <a href="results.html" class="nav-item">Intelligence Report</a>
+        <span class="nav-item active">Risk Assessment</span>
+      </div>
+
+      <div class="navbar-right">
+        <div class="profile-avatar" title="Guest User">V</div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="rsk-shell">
+
+    <!-- Empty state -->
+    <div id="emptyState" class="vrx-empty hidden">
+      <p>No project found for this session.</p>
+      <a href="index.html" class="vrx-btn-primary">Start a New Analysis</a>
+    </div>
+
+    <!-- Status flow while risk analysis is generating -->
+    <div id="statusBox" class="status-box hidden" style="margin-bottom: 28px;">
+      <ul class="status-steps">
+        <li id="stepAssess" class="status-step">
+          <span class="status-step-icon" aria-hidden="true"></span>
+          <span class="status-step-text">Evaluating risk factors…</span>
+        </li>
+        <li id="stepFeasibility" class="status-step">
+          <span class="status-step-icon" aria-hidden="true"></span>
+          <span class="status-step-text">Building SWOT &amp; feasibility…</span>
+        </li>
+      </ul>
+    </div>
+
+    <div id="reportRoot" class="hidden">
+
+      <!-- Fallback notice -->
+      <div id="fallbackBanner" class="vrx-fallback hidden">
+        <span class="vrx-fallback-dot"></span>
+        Live AI analysis was unavailable, so this report uses estimated data-driven figures based on your inputs.
+      </div>
+
+      <!-- Report meta header -->
+      <header class="vrx-meta-header">
+        <div class="vrx-meta-main">
+          <p class="vrx-eyebrow">Risk Assessment &amp; Strategic Evaluation Engine</p>
+          <h1 id="projectName" class="vrx-report-title">—</h1>
+          <div id="tagRow" class="vrx-tag-row"></div>
+        </div>
+        <a href="results.html" class="vrx-btn-secondary">← Intelligence Report</a>
+      </header>
+
+      <!-- No-analysis notice -->
+      <div id="noAnalysisNotice" class="vrx-report-card vrx-notice hidden">
+        <p id="noAnalysisText">Risk assessment is not available for this project yet.</p>
+      </div>
+
+      <div id="capabilitiesRoot">
+
+        <!-- Module 3a — Risk Scoring Engine -->
+        <section class="rsk-section">
+          <div class="rsk-section-head">
+            <span class="vrx-cap-num">04</span>
+            <div>
+              <h2>Risk Scoring Engine</h2>
+              <p class="rsk-section-sub">Business, financial, operational &amp; technical risk, rolled up into one overall score.</p>
+            </div>
+          </div>
+
+          <div class="rsk-panel">
+            <div class="rsk-gauge-row">
+              <div class="rsk-gauge" id="riskGauge">
+                <svg viewBox="0 0 168 96">
+                  <path class="rsk-gauge-track" d="M12 88 A72 72 0 0 1 156 88" fill="none" stroke-width="14"/>
+                  <path class="rsk-gauge-fill" id="riskGaugeFill" d="M12 88 A72 72 0 0 1 156 88" fill="none" stroke-width="14" stroke-dasharray="226" stroke-dashoffset="226"/>
+                </svg>
+                <div class="rsk-gauge-center">
+                  <span class="rsk-gauge-value" id="riskScoreValue">0</span>
+                  <span class="rsk-gauge-suffix">Risk / 100</span>
+                </div>
+              </div>
+              <div class="rsk-gauge-copy">
+                <div class="rsk-gauge-label-row">
+                  <span id="riskLevelBadge" class="rsk-level-badge rsk-level-low">—</span>
+                  <span id="successProbabilityText" style="font-size:0.85rem;color:var(--vrx-muted);">—</span>
+                </div>
+                <p>Overall risk score blends business, financial, operational and technical signals — lower is safer.</p>
+              </div>
+            </div>
+
+            <div id="categoryGrid" class="rsk-category-grid"></div>
+          </div>
+        </section>
+
+        <!-- Module 4a — SWOT Analysis -->
+        <section class="rsk-section">
+          <div class="rsk-section-head">
+            <span class="vrx-cap-num">05</span>
+            <div>
+              <h2>SWOT Analysis</h2>
+              <p class="rsk-section-sub">Four-quadrant strategic snapshot generated from your project details.</p>
+            </div>
+          </div>
+
+          <div class="rsk-swot-grid">
+            <div class="rsk-swot-card rsk-swot-strengths">
+              <div class="rsk-swot-head"><span class="rsk-swot-icon">S</span><h3>Strengths</h3></div>
+              <ul id="strengthsList"></ul>
+            </div>
+            <div class="rsk-swot-card rsk-swot-weaknesses">
+              <div class="rsk-swot-head"><span class="rsk-swot-icon">W</span><h3>Weaknesses</h3></div>
+              <ul id="weaknessesList"></ul>
+            </div>
+            <div class="rsk-swot-card rsk-swot-opportunities">
+              <div class="rsk-swot-head"><span class="rsk-swot-icon">O</span><h3>Opportunities</h3></div>
+              <ul id="opportunitiesList"></ul>
+            </div>
+            <div class="rsk-swot-card rsk-swot-threats">
+              <div class="rsk-swot-head"><span class="rsk-swot-icon">T</span><h3>Threats</h3></div>
+              <ul id="threatsList"></ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- Module 4b — Project Feasibility Assessment -->
+        <section class="rsk-section">
+          <div class="rsk-section-head">
+            <span class="vrx-cap-num">06</span>
+            <div>
+              <h2>Project Feasibility Assessment</h2>
+              <p class="rsk-section-sub">Overall feasibility percentage with a breakdown by dimension, plus next steps.</p>
+            </div>
+          </div>
+
+          <div class="rsk-feasibility-layout">
+            <div class="rsk-panel">
+              <div class="rsk-gauge-row">
+                <div class="rsk-gauge" id="feasibilityGauge">
+                  <svg viewBox="0 0 168 96">
+                    <path class="rsk-gauge-track" d="M12 88 A72 72 0 0 1 156 88" fill="none" stroke-width="14"/>
+                    <path class="rsk-gauge-fill" id="feasibilityGaugeFill" d="M12 88 A72 72 0 0 1 156 88" fill="none" stroke-width="14" stroke-dasharray="226" stroke-dashoffset="226" style="--rsk-gauge-color:var(--vrx-good);"/>
+                  </svg>
+                  <div class="rsk-gauge-center">
+                    <span class="rsk-gauge-value" id="feasibilityValue">0%</span>
+                    <span class="rsk-gauge-suffix">Feasible</span>
+                  </div>
+                </div>
+                <div class="rsk-gauge-copy">
+                  <span id="verdictBadge" class="rsk-verdict-badge">—</span>
+                  <p id="feasibilitySummary">—</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="rsk-panel">
+              <h3 class="vrx-panel-title" style="margin-bottom:14px;">Feasibility Breakdown</h3>
+              <div id="breakdownBars" class="rsk-breakdown-bars"></div>
+            </div>
+          </div>
+
+          <div class="rsk-panel rsk-panel-accent">
+            <h3 class="vrx-panel-title" style="margin-bottom:14px;">Recommendations</h3>
+            <ul id="recommendationsList" class="rsk-recommend-list"></ul>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <div class="site-footer-brand">
+        <svg class="brand-mark brand-mark-sm" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="40" height="40" rx="10" fill="url(#g2)"/>
+          <path d="M12 20L17.5 25.5L28 14" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="g2" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#4F46E5"/>
+              <stop offset="1" stop-color="#7C6CFF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div>
+          <span class="site-footer-brand-name">Veridex</span>
+          <p class="site-footer-tagline">Failure Prediction AI — Startup &amp; Project Risk Analyzer</p>
+        </div>
+      </div>
+
+      <nav class="site-footer-links" aria-label="Footer navigation">
+        <a href="index.html">Project Input</a>
+        <a href="results.html">Intelligence Report</a>
+        <a href="risk.html">Risk Assessment</a>
+      </nav>
+
+      <div class="site-footer-stack">
+        <span class="site-footer-label">Built with</span>
+        <span class="site-footer-tech">Node.js &middot; Express &middot; PostgreSQL &middot; Groq AI</span>
+      </div>
+    </div>
+
+    <div class="site-footer-bottom">
+      <span>&copy; 2026 Veridex. Built for the Infosys Springboard internship program.</span>
+    </div>
+  </footer>
+
+  <script src="/js/risk.js"></script>
+</body>
+</html>

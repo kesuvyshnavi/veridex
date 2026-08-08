@@ -175,6 +175,19 @@
   font-size: 0.98rem;
 }
 
+/* Two-button action group in the meta header (Risk & Feasibility + New Analysis) */
+.vrx-meta-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.vrx-meta-actions .vrx-btn-primary,
+.vrx-meta-actions .vrx-btn-secondary {
+  justify-content: center;
+}
+
 /* ---------- notice ---------- */
 .vrx-notice {
   color: var(--vrx-muted);
@@ -608,6 +621,8 @@
   .vrx-two-col { grid-template-columns: 1fr; }
   .vrx-competitor-grid { grid-template-columns: 1fr; }
   .vrx-meta-header { flex-direction: column; }
+  .vrx-meta-actions { flex-direction: row; width: 100%; }
+  .vrx-meta-actions a { flex: 1; }
 }
 
 @media (max-width: 640px) {
