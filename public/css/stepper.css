@@ -1,0 +1,171 @@
+/* server/backend/public/css/stepper.css
+   Standalone 3-step progress bar (Project Input -> Market Intelligence ->
+   Risk Assessment). Self-contained: relies only on CSS variables already
+   defined in style.css (--accent, --border, --amber, etc.), which is
+   loaded on every page, so this works on index.html without pulling in
+   results.css.
+
+   Two layouts:
+   - Default (.vrx-progress-bar): full-width row under the navbar, used on
+     results.html and risk.html.
+   - .is-compact: no full-width background/border, sits inline inside the
+     600px form column on index.html, directly above "Project Submission" —
+     so it never affects the height of the left hero panel.
+
+   States (is-pending / is-active / is-done / is-warn) are applied entirely
+   by js/stepper.js based on real sessionStorage data (and, on risk.html,
+   the actual outcome of the risk-analysis request) — never hardcoded in
+   the HTML — so a tick only ever means that step's work is really done. */
+
+.vrx-progress-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 20px 24px;
+}
+
+.vrx-progress-bar.is-compact {
+  background: transparent;
+  border-bottom: none;
+  padding: 0 0 22px;
+}
+
+.vrx-progress-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.vrx-progress-bar.is-compact .vrx-progress-inner {
+  max-width: none;
+  margin: 0;
+}
+
+.vrx-progress-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+
+.vrx-progress-step {
+  flex: 1;
+  position: relative;
+  text-align: center;
+}
+
+/* connecting line, drawn behind the circles */
+.vrx-progress-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 19px;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--border);
+  z-index: 0;
+}
+
+.vrx-progress-bar.is-compact .vrx-progress-step:not(:last-child)::after {
+  top: 15px;
+}
+
+.vrx-progress-step.is-done:not(:last-child)::after {
+  background: var(--accent);
+}
+
+.vrx-progress-link {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  position: relative;
+  z-index: 1;
+  padding: 0 8px;
+  background: var(--surface);
+}
+
+.vrx-progress-bar.is-compact .vrx-progress-link {
+  background: var(--paper);
+}
+
+.vrx-progress-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  font-size: 0.85rem;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  color: var(--text-secondary);
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+}
+
+.vrx-progress-bar.is-compact .vrx-progress-circle {
+  width: 30px;
+  height: 30px;
+  font-size: 0.72rem;
+  background: var(--paper);
+}
+
+.vrx-progress-label {
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.vrx-progress-bar.is-compact .vrx-progress-label {
+  font-size: 0.68rem;
+}
+
+/* done: filled indigo circle with a checkmark */
+.vrx-progress-step.is-done .vrx-progress-circle {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.vrx-progress-step.is-done .vrx-progress-label {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* active: outlined indigo circle with a soft halo (in progress / current) */
+.vrx-progress-step.is-active .vrx-progress-circle {
+  background: var(--surface);
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-light);
+}
+
+.vrx-progress-bar.is-compact .vrx-progress-step.is-active .vrx-progress-circle {
+  background: var(--paper);
+}
+
+.vrx-progress-step.is-active .vrx-progress-label {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* warn: this step was reached but its result came back estimated/failed */
+.vrx-progress-step.is-warn .vrx-progress-circle {
+  background: #FFFBEB;
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+.vrx-progress-step.is-warn .vrx-progress-label {
+  color: var(--amber);
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .vrx-progress-bar { padding: 14px 16px; }
+  .vrx-progress-circle { width: 30px; height: 30px; font-size: 0.74rem; }
+  .vrx-progress-label { font-size: 0.66rem; }
+  .vrx-progress-step:not(:last-child)::after { top: 15px; }
+}

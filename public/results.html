@@ -11,8 +11,9 @@
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="stylesheet" href="/css/app-status.css" />
   <link rel="stylesheet" href="/css/results.css" />
+  <link rel="stylesheet" href="/css/stepper.css" />
 </head>
-<body>
+<body data-page="results">
 
   <!-- Navbar (same structure as index.html so the brand stays consistent) -->
   <nav class="navbar">
@@ -33,8 +34,7 @@
           <span class="navbar-tagline">Failure Prediction AI</span>
         </div>
       </div>
-
-      <div class="navbar-links">
+<div class="navbar-links">
         <a href="index.html" class="nav-item">Project Input</a>
         <span class="nav-item active">Intelligence Report</span>
         <a href="risk.html" class="nav-item">Risk Assessment</a>
@@ -46,8 +46,35 @@
     </div>
   </nav>
 
-  <main class="vrx-shell">
+  <!-- 3-step progress indicator -->
+  <nav class="vrx-progress-bar" aria-label="Analysis progress">
+    <div class="vrx-progress-inner">
+      <ol class="vrx-progress-list">
+        <li id="navStep1" class="vrx-progress-step">
+          <a href="index.html" class="vrx-progress-link">
+            <span class="vrx-progress-circle" data-num="1">1</span>
+            <span class="vrx-progress-label">Project Input</span>
+          </a>
+        </li>
+        <li id="navStep2" class="vrx-progress-step">
+          <a href="results.html" class="vrx-progress-link" aria-current="step">
+            <span class="vrx-progress-circle" data-num="2">2</span>
+            <span class="vrx-progress-label">Market Intelligence</span>
+          </a>
+        </li>
+        <li id="navStep3" class="vrx-progress-step">
+          <a href="risk.html" class="vrx-progress-link">
+            <span class="vrx-progress-circle" data-num="3">3</span>
+            <span class="vrx-progress-label">Risk Assessment</span>
+          </a>
+        </li>
+      </ol>
+    </div>
+  </nav>
+  <script src="/js/stepper.js"></script>
 
+  <main class="vrx-shell">
+      
     <!-- Empty state -->
     <div id="emptyState" class="vrx-empty hidden">
       <p>No analysis found for this session.</p>

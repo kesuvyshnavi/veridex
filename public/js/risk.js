@@ -86,6 +86,7 @@ async function runRiskAssessment(data) {
 
     reportRoot.classList.remove('hidden');
     renderAnalysis(result.analysis);
+    if (window.VeridexStepper) window.VeridexStepper.setStep(3, 'done');
   } catch (err) {
     console.error('Risk analysis request failed:', err);
     setStepState(stepFeasibility, 'warn', 'Unable to reach the server');
@@ -105,6 +106,7 @@ function renderMetaHeader(project, submittedAt) {
 }
 
 function showNoAnalysis(message) {
+  if (window.VeridexStepper) window.VeridexStepper.setStep(3, 'warn');
   reportRoot.classList.remove('hidden');
   document.getElementById('noAnalysisText').textContent = message;
   document.getElementById('noAnalysisNotice').classList.remove('hidden');

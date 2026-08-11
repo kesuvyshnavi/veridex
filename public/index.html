@@ -10,8 +10,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="stylesheet" href="/css/app-status.css" />
+  <link rel="stylesheet" href="/css/stepper.css" />
 </head>
-<body>
+<body data-page="input">
 
   <!-- Navbar -->
   <nav class="navbar">
@@ -32,8 +33,7 @@
           <span class="navbar-tagline">Failure Prediction AI</span>
         </div>
       </div>
-
-      <div class="navbar-links">
+<div class="navbar-links">
         <span class="nav-item active">Project Input</span>
         <a href="results.html" class="nav-item">Intelligence Report</a>
         <a href="risk.html" class="nav-item">Risk Assessment</a>
@@ -94,13 +94,39 @@
 
     <!-- Right content panel -->
     <main class="content-panel">
-      <div class="content-inner">
+     
+<div class="content-inner">
+
+        <!-- 3-step progress indicator (scoped to this column so the hero panel never shifts) -->
+        <nav class="vrx-progress-bar is-compact" aria-label="Analysis progress">
+          <div class="vrx-progress-inner">
+            <ol class="vrx-progress-list">
+              <li id="navStep1" class="vrx-progress-step">
+                <span class="vrx-progress-link" aria-current="step">
+                  <span class="vrx-progress-circle" data-num="1">1</span>
+                  <span class="vrx-progress-label">Project Input</span>
+                </span>
+              </li>
+              <li id="navStep2" class="vrx-progress-step">
+                <a href="results.html" class="vrx-progress-link">
+                  <span class="vrx-progress-circle" data-num="2">2</span>
+                  <span class="vrx-progress-label">Market Intelligence</span>
+                </a>
+              </li>
+              <li id="navStep3" class="vrx-progress-step">
+                <a href="risk.html" class="vrx-progress-link">
+                  <span class="vrx-progress-circle" data-num="3">3</span>
+                  <span class="vrx-progress-label">Risk Assessment</span>
+                </a>
+              </li>
+            </ol>
+          </div>
+        </nav>
 
         <div class="page-head">
           <h2 class="page-title">Project Submission</h2>
           <p class="page-subtitle">Fill in your project details below to generate your analysis.</p>
         </div>
-
         <form id="projectForm" class="project-form" novalidate>
 
           <div class="form-group">
@@ -250,5 +276,6 @@
   </footer>
 
   <script src="/js/main.js"></script>
+   <script src="/js/stepper.js"></script>
 </body>
 </html>
