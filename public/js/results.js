@@ -30,18 +30,32 @@ const reportRoot = document.getElementById('reportRoot');
 
 const raw = sessionStorage.getItem('veridexResult');
 
+let currentProjectData = null;
+
 if (!raw) {
   emptyState.classList.remove('hidden');
 } else {
   try {
-    const data = JSON.parse(raw);
+    currentProjectData = JSON.parse(raw);
     reportRoot.classList.remove('hidden');
-    renderReport(data);
+    renderReport(currentProjectData);
   } catch (err) {
     console.error('Failed to parse stored result:', err);
     reportRoot.classList.add('hidden');
     emptyState.classList.remove('hidden');
   }
+}
+
+// "Edit Details" -> stash just the project fields (not the analysis) under a
+// separate key and send the user back to the input form to fix them.
+const editDetailsBtn = document.getElementById('editDetailsBtn');
+if (editDetailsBtn) {
+  editDetailsBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (!currentProjectData || !currentProjectData.project) return;
+    sessionStorage.setItem('veridexEditData', JSON.stringify(currentProjectData.project));
+    window.location.href = 'index.html?edit=true';
+  });
 }
 
 function renderReport(data) {

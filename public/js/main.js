@@ -96,6 +96,42 @@ currencySelect.addEventListener('change', () => {
   populateBudgetOptions(currencySelect.value);
 });
 
+// If we arrived here via "Edit Details" on results.html/risk.html, pull the
+// previously submitted fields back into the form. Must run after the budget
+// dropdown init above so populateBudgetOptions() exists to rebuild ranges
+// for the restored currency before we set the budget value itself.
+(function prefillFromEdit() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('edit') !== 'true') return;
+
+  const raw = sessionStorage.getItem('veridexEditData');
+  if (!raw) return;
+
+  let editData;
+  try {
+    editData = JSON.parse(raw);
+  } catch (err) {
+    return;
+  } finally {
+    sessionStorage.removeItem('veridexEditData');
+  }
+
+  document.getElementById('project_name').value = editData.project_name || '';
+  document.getElementById('industry').value = editData.industry || '';
+  document.getElementById('business_model').value = editData.business_model || '';
+  document.getElementById('target_market').value = editData.target_market || '';
+  currencySelect.value = editData.currency || 'INR';
+  populateBudgetOptions(currencySelect.value); // rebuild ranges for the restored currency
+  budgetSelect.value = editData.budget || '';
+  document.getElementById('description').value = editData.description || '';
+
+  const subtitle = document.querySelector('.page-subtitle');
+  if (subtitle) {
+    subtitle.textContent =
+      'Editing your previous submission — update the fields and click Analyze Project to regenerate the report.';
+  }
+})();
+
 // Clears all field-level error messages
 function clearErrors() {
   document.querySelectorAll('.error-msg').forEach((el) => (el.textContent = ''));
