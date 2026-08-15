@@ -1,0 +1,181 @@
+<!-- server/backend/public/home.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Veridex — Know the Risk Before You Build</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="icon" href="/favicon.ico?v=2" sizes="any">
+  <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2">
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/app-status.css" />
+  <link rel="stylesheet" href="/css/results.css" />
+  <link rel="stylesheet" href="/css/home.css" />
+</head>
+<body data-page="home">
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-left">
+        <svg class="brand-mark" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="vrxGradNav" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#6D5CFF"/>
+              <stop offset="0.5" stop-color="#4F46E5"/>
+              <stop offset="1" stop-color="#3730A3"/>
+            </linearGradient>
+            <radialGradient id="vrxSheenNav" cx="13" cy="9" r="11" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#FFFFFF" stop-opacity="0.45"/>
+              <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <rect width="40" height="40" rx="11" fill="url(#vrxGradNav)"/>
+          <rect width="40" height="40" rx="11" fill="url(#vrxSheenNav)"/>
+          <path d="M11.5 20.5L17 26L29 12.5" fill="none" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="brand-text">
+          <span class="navbar-brand">Veridex</span>
+          <span class="navbar-tagline">Failure Prediction AI</span>
+        </div>
+      </div>
+
+      <div class="navbar-right">
+        <a href="index.html" class="submit-btn" style="width:auto;padding:9px 20px;font-size:14px;">Get Started</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="home-hero">
+    <div class="home-hero-glow"></div>
+    <div class="home-hero-inner">
+      <p class="page-eyebrow eyebrow-light">Startup &amp; Project Risk Analyzer</p>
+      <h1>Validate your idea before it costs you anything.</h1>
+      <p>Veridex is an AI-powered platform that studies your startup or project idea — its market, competitors, risk profile, and feasibility — before you spend the time and budget to build it. Submit your idea and get a complete, data-backed report in moments.</p>
+      <div class="home-cta-row">
+        <a href="index.html" class="home-btn-primary">
+          Get Started
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+     
+    </div>
+  </section>
+
+  <!-- What Veridex does -->
+  <section class="home-section">
+    <div class="home-section-head">
+      <h2>Three engines, one complete picture</h2>
+      <p>Every submission runs through three AI-driven analysis engines, each covering a different angle of your idea's viability.</p>
+    </div>
+
+    <div class="home-feature-grid">
+      <div class="home-feature-card">
+        <div class="home-feature-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 3V21H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 16L11 11L14 14L20 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3>Market &amp; Competitor Intelligence</h3>
+        <p>Market sizing (TAM/SAM/SOM), a 5-year growth trend, key competitor positioning, and identified opportunities specific to your sector.</p>
+      </div>
+
+      <div class="home-feature-card">
+        <div class="home-feature-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4.5 8-11V5l-8-3-8 3v6c0 6.5 8 11 8 11z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        </div>
+        <h3>Risk Scoring &amp; SWOT</h3>
+        <p>Business, financial, operational and technical risk scored individually, plus a full Strengths / Weaknesses / Opportunities / Threats breakdown.</p>
+      </div>
+
+      <div class="home-feature-card">
+        <div class="home-feature-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M9 11L12 14L22 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12V19C21 20.1 20.1 21 19 21H5C3.9 21 3 20.1 3 19V5C3 3.9 3.9 3 5 3H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3>Feasibility &amp; Recommendations</h3>
+        <p>An overall feasibility percentage with a dimensional breakdown, plus concrete, actionable next steps tailored to your project.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="home-section" style="padding-top:0;">
+    <div class="home-section-head">
+      <h2>How it works</h2>
+      <p>Three steps, no technical knowledge required.</p>
+    </div>
+
+    <div class="home-steps-row">
+      <div class="home-step">
+        <div class="home-step-num">1</div>
+        <h3>Submit your project</h3>
+        <p>Share your project name, sector, business model, target market, budget and a short description.</p>
+      </div>
+      <div class="home-step">
+        <div class="home-step-num">2</div>
+        <h3>Get your intelligence report</h3>
+        <p>Veridex generates a market &amp; competitor intelligence report in moments, powered by AI.</p>
+      </div>
+      <div class="home-step">
+        <div class="home-step-num">3</div>
+        <h3>Review risk &amp; feasibility</h3>
+        <p>See your risk score, SWOT analysis, and feasibility verdict — with recommendations to act on.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <div class="home-final-cta">
+    <h2>Ready to validate your idea?</h2>
+    <p>It takes about a minute to submit, and your report is ready right after.</p>
+    <a href="index.html" class="home-btn-primary" style="color:#fff;">Get Started →</a>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <div class="site-footer-brand">
+        <svg class="brand-mark brand-mark-sm" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="vrxGradFoot" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#6D5CFF"/>
+              <stop offset="0.5" stop-color="#4F46E5"/>
+              <stop offset="1" stop-color="#3730A3"/>
+            </linearGradient>
+            <radialGradient id="vrxSheenFoot" cx="13" cy="9" r="11" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#FFFFFF" stop-opacity="0.45"/>
+              <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <rect width="40" height="40" rx="11" fill="url(#vrxGradFoot)"/>
+          <rect width="40" height="40" rx="11" fill="url(#vrxSheenFoot)"/>
+          <path d="M11.5 20.5L17 26L29 12.5" fill="none" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div>
+          <span class="site-footer-brand-name">Veridex</span>
+          <p class="site-footer-tagline">Failure Prediction AI — Startup &amp; Project Risk Analyzer</p>
+        </div>
+      </div>
+
+      <nav class="site-footer-links" aria-label="Footer navigation">
+        <a href="index.html">Project Input</a>
+        <a href="results.html">Intelligence Report</a>
+        <a href="risk.html">Risk Assessment</a>
+      </nav>
+
+      <div class="site-footer-stack">
+        <span class="site-footer-label">Built with</span>
+        <span class="site-footer-tech">Node.js &middot; Express &middot; PostgreSQL &middot; Groq AI</span>
+      </div>
+    </div>
+
+    <div class="site-footer-bottom">
+      <span>&copy; 2026 Veridex. Built for the Infosys Springboard internship program.</span>
+    </div>
+  </footer>
+
+</body>
+</html>

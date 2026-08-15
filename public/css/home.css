@@ -1,0 +1,232 @@
+/* server/backend/public/css/home.css
+   Landing page — reuses the vrx- design tokens from results.css
+   (already loaded app-wide) but introduces its own hero + feature-grid
+   layout, since the landing page isn't part of the 3-step analysis flow. */
+
+.home-hero {
+  background: linear-gradient(160deg, var(--ink) 0%, var(--ink-soft) 100%);
+  position: relative;
+  overflow: hidden;
+  padding: 96px 24px 110px;
+  text-align: center;
+}
+
+.home-hero-glow {
+  position: absolute;
+  top: -160px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 560px;
+  height: 560px;
+  background: radial-gradient(circle, rgba(124, 108, 255, 0.35), transparent 70%);
+  pointer-events: none;
+}
+
+.home-hero-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.home-hero h1 {
+  color: #fff;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(2.1rem, 5vw, 3.4rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin: 18px 0 20px;
+}
+
+.home-hero p {
+  color: #A6AFC7;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  max-width: 560px;
+  margin: 0 auto 34px;
+}
+
+.home-cta-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.home-cta-note {
+  color: #7C86A3;
+  font-size: 0.8rem;
+  margin-top: 14px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.home-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--accent), #7C6CFF);
+  color: #fff;
+  border: none;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 14px 28px;
+  border-radius: 10px;
+  text-decoration: none;
+  box-shadow: 0 10px 26px -10px rgba(79, 70, 229, 0.7);
+  transition: transform 0.15s ease;
+}
+
+.home-btn-primary:hover { transform: translateY(-1px); }
+
+.home-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  color: #C7CEE8;
+  border: 1px solid rgba(255,255,255,0.18);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 13px 24px;
+  border-radius: 10px;
+  text-decoration: none;
+}
+
+/* ---------- feature grid ---------- */
+.home-section {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 72px 24px;
+}
+
+.home-section-head {
+  text-align: center;
+  max-width: 560px;
+  margin: 0 auto 40px;
+}
+
+.home-section-head h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+
+.home-section-head p {
+  color: var(--text-secondary);
+  font-size: 0.98rem;
+  line-height: 1.6;
+}
+
+.home-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.home-feature-card {
+  background: var(--vrx-panel);
+  border: 1px solid var(--vrx-border);
+  border-radius: 16px;
+  padding: 26px 24px;
+}
+
+.home-feature-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  background: var(--vrx-indigo-50);
+  border: 1px solid #DCE0FF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--vrx-indigo);
+  margin-bottom: 16px;
+}
+
+.home-feature-icon svg { width: 22px; height: 22px; }
+
+.home-feature-card h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--vrx-ink);
+  margin-bottom: 8px;
+}
+
+.home-feature-card p {
+  color: var(--vrx-muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* ---------- how it works ---------- */
+.home-steps-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  counter-reset: home-step;
+}
+
+.home-step {
+  text-align: center;
+  padding: 0 12px;
+}
+
+.home-step-num {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent-light);
+  color: var(--accent);
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+}
+
+.home-step h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.home-step p {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.home-final-cta {
+  text-align: center;
+  background: var(--vrx-indigo-50);
+  border: 1px solid #DCE0FF;
+  border-radius: 18px;
+  padding: 48px 24px;
+  margin: 0 24px 72px;
+}
+
+.home-final-cta h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+
+.home-final-cta p {
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+@media (max-width: 860px) {
+  .home-feature-grid,
+  .home-steps-row { grid-template-columns: 1fr; }
+  .home-hero { padding: 72px 20px 84px; }
+}
