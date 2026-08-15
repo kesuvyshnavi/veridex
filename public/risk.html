@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="stylesheet" href="/css/app-status.css" />
   <link rel="stylesheet" href="/css/results.css" />
@@ -20,15 +23,21 @@
   <nav class="navbar">
     <div class="navbar-inner">
       <div class="navbar-left">
-        <svg class="brand-mark" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="40" height="40" rx="10" fill="url(#g1)"/>
-          <path d="M12 20L17.5 25.5L28 14" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <svg class="brand-mark" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <linearGradient id="g1" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#4F46E5"/>
-              <stop offset="1" stop-color="#7C6CFF"/>
+            <linearGradient id="vrxGradNav" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#6D5CFF"/>
+              <stop offset="0.5" stop-color="#4F46E5"/>
+              <stop offset="1" stop-color="#3730A3"/>
             </linearGradient>
+            <radialGradient id="vrxSheenNav" cx="13" cy="9" r="11" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#FFFFFF" stop-opacity="0.45"/>
+              <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+            </radialGradient>
           </defs>
+          <rect width="40" height="40" rx="11" fill="url(#vrxGradNav)"/>
+          <rect width="40" height="40" rx="11" fill="url(#vrxSheenNav)"/>
+          <path d="M11.5 20.5L17 26L29 12.5" fill="none" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         <div class="brand-text">
           <span class="navbar-brand">Veridex</span>
@@ -238,15 +247,21 @@
   <footer class="site-footer">
     <div class="site-footer-inner">
       <div class="site-footer-brand">
-        <svg class="brand-mark brand-mark-sm" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="40" height="40" rx="10" fill="url(#g2)"/>
-          <path d="M12 20L17.5 25.5L28 14" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <svg class="brand-mark brand-mark-sm" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <linearGradient id="g2" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#4F46E5"/>
-              <stop offset="1" stop-color="#7C6CFF"/>
+            <linearGradient id="vrxGradFoot" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#6D5CFF"/>
+              <stop offset="0.5" stop-color="#4F46E5"/>
+              <stop offset="1" stop-color="#3730A3"/>
             </linearGradient>
+            <radialGradient id="vrxSheenFoot" cx="13" cy="9" r="11" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#FFFFFF" stop-opacity="0.45"/>
+              <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+            </radialGradient>
           </defs>
+          <rect width="40" height="40" rx="11" fill="url(#vrxGradFoot)"/>
+          <rect width="40" height="40" rx="11" fill="url(#vrxSheenFoot)"/>
+          <path d="M11.5 20.5L17 26L29 12.5" fill="none" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         <div>
           <span class="site-footer-brand-name">Veridex</span>
