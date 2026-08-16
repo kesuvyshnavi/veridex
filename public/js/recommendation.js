@@ -125,9 +125,85 @@ function renderReport(report) {
   if (report.isFallback) {
     document.getElementById('fallbackBanner').classList.remove('hidden');
   }
+  renderDonut('priorityDonut', 'priorityLegend', report.recommendations, 'priority', PRIORITY_COLORS, [
+    'Critical',
+    'High',
+    'Medium',
+    'Low',
+  ]);
+  renderDonut('impactDonut', 'impactLegend', report.riskMitigation, 'impact', IMPACT_COLORS, [
+    'High',
+    'Medium',
+    'Low',
+  ]);
   renderRecommendations(report.recommendations);
   renderMitigation(report.riskMitigation);
-  renderAgentTrace(report.agentTrace);
+  renderAgentPipeline(report.agentTrace);
+}
+
+// ---------- Distribution donut charts (pure CSS conic-gradient, no chart
+// library) — gives the Recommendations page its first real "at a glance"
+// visualization instead of only text cards. ----------
+const PRIORITY_COLORS = {
+  Critical: '#DC2626',
+  High: '#D97706',
+  Medium: '#2563EB',
+  Low: '#94A3B8',
+};
+
+const IMPACT_COLORS = {
+  High: '#D97706',
+  Medium: '#2563EB',
+  Low: '#94A3B8',
+};
+
+function renderDonut(donutId, legendId, items, key, colorMap, order) {
+  const donut = document.getElementById(donutId);
+  const legend = document.getElementById(legendId);
+  if (!donut || !legend) return;
+
+  const counts = {};
+  order.forEach((k) => (counts[k] = 0));
+  (items || []).forEach((item) => {
+    const val = item[key];
+    if (counts[val] === undefined) counts[val] = 0;
+    counts[val] += 1;
+  });
+
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
+  const totalEl = donut.querySelector('.rec-donut-total');
+  if (totalEl) totalEl.textContent = total;
+
+  if (total === 0) {
+    donut.style.setProperty('--seg', 'conic-gradient(#EEF0F6 0% 100%)');
+    legend.innerHTML = '<li>No data yet</li>';
+    return;
+  }
+
+  let cursor = 0;
+  const segments = [];
+  order.forEach((k) => {
+    const count = counts[k] || 0;
+    if (!count) return;
+    const pct = (count / total) * 100;
+    const color = colorMap[k] || '#94A3B8';
+    segments.push(`${color} ${cursor}% ${cursor + pct}%`);
+    cursor += pct;
+  });
+  donut.style.setProperty('--seg', `conic-gradient(${segments.join(', ')})`);
+
+  legend.innerHTML = order
+    .filter((k) => counts[k])
+    .map(
+      (k) => `
+      <li>
+        <span class="rec-legend-dot" style="background:${colorMap[k] || '#94A3B8'}"></span>
+        <span>${escapeHtml(k)}</span>
+        <span class="rec-legend-count">${counts[k]}</span>
+      </li>
+    `
+    )
+    .join('');
 }
 
 function priorityClass(priority) {
@@ -204,7 +280,11 @@ const TRACE_ICONS = {
   'Report Generation': '▤',
 };
 
-function renderAgentTrace(trace) {
+// Renders the LangGraph execution trace as a connected pipeline diagram —
+// numbered nodes on a vertical rail joined by a line that's colored per
+// node status — instead of a plain list, so the agent workflow actually
+// reads as a workflow.
+function renderAgentPipeline(trace) {
   const panel = document.getElementById('agentTracePanel');
   if (!trace || !trace.length) {
     panel.innerHTML = '<p>—</p>';
@@ -212,12 +292,16 @@ function renderAgentTrace(trace) {
   }
   panel.innerHTML = trace
     .map(
-      (step) => `
-      <div class="trace-step trace-${step.status}">
-        <span class="trace-icon">${TRACE_ICONS[step.node] || '•'}</span>
-        <div>
-          <span class="trace-node">${escapeHtml(step.node)}</span>
-          <p class="trace-detail">${escapeHtml(step.detail)}</p>
+      (step, i) => `
+      <div class="pipe-node ${step.status === 'warn' ? 'pipe-warn' : ''}">
+        <div class="pipe-node-rail">
+          <div class="pipe-node-dot">${TRACE_ICONS[step.node] || i + 1}</div>
+          <div class="pipe-node-line"></div>
+        </div>
+        <div class="pipe-node-body">
+          <span class="pipe-node-tag">Node ${i + 1} / ${trace.length}</span>
+          <span class="pipe-node-name">${escapeHtml(step.node)}</span>
+          <p class="pipe-node-detail">${escapeHtml(step.detail)}</p>
         </div>
       </div>
     `

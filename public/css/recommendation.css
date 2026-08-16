@@ -144,49 +144,194 @@
   color: var(--vrx-muted);
 }
 
-/* ---------- LangGraph agent trace ---------- */
-.trace-step {
+/* ---------- mini distribution donut charts ---------- */
+.rec-chart-row {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 10px 0;
-  border-bottom: 1px dashed var(--vrx-border);
+  align-items: center;
+  gap: 24px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--vrx-indigo-50) 0%, #FBFBFF 100%);
+  border: 1px solid #E4E7F2;
 }
 
-.trace-step:last-child { border-bottom: none; }
+.rec-donut {
+  --seg: conic-gradient(#EEF0F6 0% 100%);
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--seg);
+  position: relative;
+  flex: none;
+  transition: background 0.4s ease;
+  box-shadow: 0 6px 16px -8px rgba(15, 23, 42, 0.25);
+}
 
-.trace-icon {
-  width: 26px;
-  height: 26px;
+.rec-donut::after {
+  content: '';
+  position: absolute;
+  inset: 15px;
+  border-radius: 50%;
+  background: var(--vrx-panel);
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.04);
+}
+
+.rec-donut-center {
+  position: absolute;
+  inset: 15px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  padding: 0 4px;
+}
+
+.rec-donut-total {
+  font-family: var(--vrx-font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.rec-donut-label {
+  font-family: var(--vrx-font-mono);
+  font-size: 0.5rem;
+  color: var(--vrx-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  margin-top: 3px;
+  text-align: center;
+  max-width: 56px;
+  overflow-wrap: break-word;
+}
+
+.rec-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  flex: 1;
+  min-width: 0;
+}
+
+.rec-legend li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.83rem;
+  color: var(--vrx-ink);
+}
+
+.rec-legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.rec-legend-count {
+  margin-left: auto;
+  font-family: var(--vrx-font-mono);
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--vrx-muted);
+  background: rgba(15, 23, 42, 0.04);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+/* ---------- LangGraph pipeline diagram ---------- */
+.rec-pipeline {
+  gap: 0;
+}
+
+.pipe-node {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  padding-bottom: 20px;
+}
+
+.pipe-node:last-child { padding-bottom: 0; }
+
+.pipe-node-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: none;
+}
+
+.pipe-node-dot {
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: none;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 700;
   background: var(--vrx-indigo-50);
   color: var(--vrx-indigo);
-  border: 1px solid #DCE0FF;
+  border: 2px solid var(--vrx-indigo);
+  flex: none;
+  z-index: 1;
 }
 
-.trace-step.trace-warn .trace-icon {
+.pipe-node.pipe-warn .pipe-node-dot {
   background: var(--vrx-warn-bg);
   color: var(--vrx-warn);
-  border-color: #FCEAC1;
+  border-color: var(--vrx-warn);
 }
 
-.trace-node {
+.pipe-node-line {
+  width: 2px;
+  flex: 1;
+  min-height: 18px;
+  background: linear-gradient(to bottom, var(--vrx-indigo), var(--vrx-border));
+  margin-top: 2px;
+}
+
+.pipe-node.pipe-warn .pipe-node-line {
+  background: linear-gradient(to bottom, var(--vrx-warn), var(--vrx-border));
+}
+
+.pipe-node:last-child .pipe-node-line {
+  display: none;
+}
+
+.pipe-node-body {
+  padding-top: 1px;
+  min-width: 0;
+}
+
+.pipe-node-tag {
   font-family: var(--vrx-font-mono);
-  font-size: 0.78rem;
-  font-weight: 600;
+  font-size: 0.6rem;
+  color: var(--vrx-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.pipe-node-name {
+  font-family: var(--vrx-font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
   display: block;
 }
 
-.trace-detail {
-  margin: 2px 0 0;
+.pipe-node-detail {
+  margin: 3px 0 0;
   font-size: 0.78rem;
   color: var(--vrx-muted);
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 /* ---------- responsive ---------- */
@@ -196,4 +341,5 @@
 
 @media (max-width: 640px) {
   .rec-shell { padding: 24px 16px 64px; }
+  .rec-chart-row { flex-wrap: wrap; }
 }

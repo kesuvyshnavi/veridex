@@ -122,11 +122,11 @@
   gap: 24px;
 }
 
-/* Slimmed-down footer variant: just the brand block, centered — the
-   navbar already carries page navigation, so the footer no longer
-   repeats a links list or a "Built with" tech stack line. */
+/* Brand-left, GitHub-right footer variant — the navbar already carries
+   page navigation, so the footer just carries brand identity plus a
+   direct link into the source repository for reviewers. */
 .site-footer-inner-solo {
-  justify-content: center;
+  justify-content: space-between;
 }
 
 .site-footer-brand {
@@ -150,6 +150,34 @@
   color: #64748B;
 }
 
+.site-footer-github {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  flex: none;
+  white-space: nowrap;
+}
+
+.site-footer-github svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.site-footer-github:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
 .site-footer-bottom {
   border-top: 1px solid #E4E7F2;
   padding: 12px 24px;
@@ -159,6 +187,6 @@
 }
 
 @media (max-width: 640px) {
-  .site-footer-inner { flex-direction: column; align-items: center; text-align: center; }
+  .site-footer-inner { flex-direction: column; align-items: center; text-align: center; gap: 16px; }
   .status-complete { flex-direction: column; align-items: flex-start; }
 }
