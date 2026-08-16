@@ -5,6 +5,7 @@ require('dotenv').config();
 
 const projectRoutes = require('./routes/projectRoutes');
 const riskRoutes = require('./routes/riskRoutes');
+const recommendationRoutes = require('./routes/recommendationRoutes');
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 // API routes
 app.use('/api/projects', projectRoutes);
 app.use('/api/risk-analysis', riskRoutes);
+app.use('/api/recommendations', recommendationRoutes);
 
 // Root route: serve home.html as the landing page
 app.get('/', (req, res) => {

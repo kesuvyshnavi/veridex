@@ -3,6 +3,12 @@
 // (Milestone 2) for the most recently submitted project. Reuses the same
 // sessionStorage payload main.js already wrote for results.html, then
 // calls POST /api/risk-analysis to generate risk + SWOT + feasibility.
+//
+// Milestone 3 addition: on a successful (or fallback) run, the analysis is
+// also cached under 'veridexRiskResult' so recommendation.js can ground
+// the Strategic Reasoning prompt in real risk data without re-running this
+// engine. On a failed run, that cache is cleared so stale data never leaks
+// into Milestone 3.
 
 const GAUGE_PATH_LENGTH = 226; // matches the arc path length used in risk.html
 
@@ -70,12 +76,14 @@ async function runRiskAssessment(data) {
 
     if (!response.ok || !result.success) {
       setStepState(stepFeasibility, 'warn', 'Could not complete assessment');
+      sessionStorage.removeItem('veridexRiskResult');
       showNoAnalysis(result.message || 'Risk assessment could not be generated.');
       return;
     }
 
     if (!result.analysis) {
       setStepState(stepFeasibility, 'warn', 'Analysis unavailable');
+      sessionStorage.removeItem('veridexRiskResult');
       showNoAnalysis(result.analysisError || 'Risk assessment is not available for this project yet.');
       return;
     }
@@ -84,12 +92,21 @@ async function runRiskAssessment(data) {
     await wait(300);
     statusBox.classList.add('hidden');
 
+    // Cache for Milestone 3's Recommendations & Strategic Reasoning engine —
+    // stored even when isFallback is true so that engine's fallback numbers
+    // stay proportionate rather than having no risk context at all.
+    sessionStorage.setItem(
+      'veridexRiskResult',
+      JSON.stringify({ analysis: result.analysis, generatedAt: new Date().toISOString() })
+    );
+
     reportRoot.classList.remove('hidden');
     renderAnalysis(result.analysis);
     if (window.VeridexStepper) window.VeridexStepper.setStep(3, 'done');
   } catch (err) {
     console.error('Risk analysis request failed:', err);
     setStepState(stepFeasibility, 'warn', 'Unable to reach the server');
+    sessionStorage.removeItem('veridexRiskResult');
     showNoAnalysis('Unable to reach the server. Please check your connection and try again.');
   }
 }

@@ -2,12 +2,14 @@
 
 // Landing on the Project Input page always starts a fresh session — any
 // previously stored analysis (Market Intelligence + Risk Assessment) is
-// cleared here so results.html / risk.html can't show stale data from an
-// earlier project if the user navigates to them without resubmitting.
+// cleared here so results.html / risk.html / recommendations.html can't
+// show stale data from an earlier project if the user navigates to them
+// without resubmitting.
 // Runs both on normal load and on back/forward-cache restores (pageshow),
 // since bfcache restores a page without re-running its top-level scripts.
 function clearPreviousAnalysis() {
   sessionStorage.removeItem('veridexResult');
+  sessionStorage.removeItem('veridexRiskResult');
 }
 clearPreviousAnalysis();
 window.addEventListener('pageshow', clearPreviousAnalysis);

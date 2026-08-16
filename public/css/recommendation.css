@@ -1,0 +1,199 @@
+/* server/backend/public/css/recommendation.css
+   Styles for the Recommendations & Strategic Reasoning Engine
+   (recommendations.html, Milestone 3). Shares the "vrx-" design tokens
+   from results.css but introduces its own three-column layout so the
+   LangGraph agent trace reads as a distinct, real workflow rather than a
+   generic list. */
+
+.rec-shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 40px 24px 96px;
+  font-family: var(--vrx-font-body);
+  color: var(--vrx-ink);
+}
+
+.rec-section-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.rec-section-head h2 {
+  font-family: var(--vrx-font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.rec-section-sub {
+  color: var(--vrx-muted);
+  font-size: 0.9rem;
+  margin: 0;
+  max-width: 720px;
+}
+
+/* ---------- informational (not warning) banner when Risk Assessment
+   hasn't been run yet for this session — recommendations still work,
+   just from a thinner context ---------- */
+.rec-info-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--vrx-info-bg);
+  border: 1px solid #CBDBFC;
+  color: #1D4ED8;
+  font-size: 0.85rem;
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 24px;
+}
+
+.rec-info-banner a {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* ---------- three-column workflow layout ---------- */
+.rec-columns {
+  display: grid;
+  grid-template-columns: 1.1fr 1.1fr 0.9fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.rec-panel {
+  background: var(--vrx-panel);
+  border: 1px solid var(--vrx-border);
+  border-radius: 14px;
+  padding: 18px 18px 20px;
+}
+
+.rec-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.rec-panel-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.rec-panel-icon.rec-icon-ai { background: var(--vrx-indigo); }
+.rec-panel-icon.rec-icon-mitigation { background: var(--vrx-warn); }
+.rec-panel-icon.rec-icon-agent { background: var(--vrx-info); }
+
+.rec-panel-head h3 {
+  font-family: var(--vrx-font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.rec-panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ---------- recommendation / mitigation cards ---------- */
+.rec-card {
+  border: 1px solid var(--vrx-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: #FBFBFF;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.rec-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px -12px rgba(79, 70, 229, 0.35);
+  border-color: #DCE0FF;
+}
+
+.rec-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.rec-card-title {
+  font-family: var(--vrx-font-display);
+  font-weight: 700;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.rec-card-body {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--vrx-muted);
+}
+
+/* ---------- LangGraph agent trace ---------- */
+.trace-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--vrx-border);
+}
+
+.trace-step:last-child { border-bottom: none; }
+
+.trace-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  font-size: 0.85rem;
+  background: var(--vrx-indigo-50);
+  color: var(--vrx-indigo);
+  border: 1px solid #DCE0FF;
+}
+
+.trace-step.trace-warn .trace-icon {
+  background: var(--vrx-warn-bg);
+  color: var(--vrx-warn);
+  border-color: #FCEAC1;
+}
+
+.trace-node {
+  font-family: var(--vrx-font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  display: block;
+}
+
+.trace-detail {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  color: var(--vrx-muted);
+  line-height: 1.45;
+}
+
+/* ---------- responsive ---------- */
+@media (max-width: 960px) {
+  .rec-columns { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .rec-shell { padding: 24px 16px 64px; }
+}
