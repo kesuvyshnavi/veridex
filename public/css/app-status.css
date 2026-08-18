@@ -122,9 +122,9 @@
   gap: 24px;
 }
 
-/* Brand-left, GitHub-right footer variant — the navbar already carries
-   page navigation, so the footer just carries brand identity plus a
-   direct link into the source repository for reviewers. */
+/* Brand-left, links-right footer variant — the navbar already carries
+   page navigation, so the footer just carries brand identity plus quick
+   links (Home, GitHub) for reviewers landing on an inner page. */
 .site-footer-inner-solo {
   justify-content: space-between;
 }
@@ -150,7 +150,15 @@
   color: #64748B;
 }
 
-.site-footer-github {
+/* ---------- footer link group (Home + GitHub) ---------- */
+.site-footer-links {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.site-footer-github,
+.site-footer-link {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -166,13 +174,15 @@
   white-space: nowrap;
 }
 
-.site-footer-github svg {
+.site-footer-github svg,
+.site-footer-link svg {
   width: 16px;
   height: 16px;
   flex: none;
 }
 
-.site-footer-github:hover {
+.site-footer-github:hover,
+.site-footer-link:hover {
   border-color: var(--accent);
   color: var(--accent);
   transform: translateY(-1px);
@@ -189,4 +199,5 @@
 @media (max-width: 640px) {
   .site-footer-inner { flex-direction: column; align-items: center; text-align: center; gap: 16px; }
   .status-complete { flex-direction: column; align-items: flex-start; }
+  .site-footer-links { flex-wrap: wrap; justify-content: center; }
 }
