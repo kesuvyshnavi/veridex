@@ -28,6 +28,7 @@
 html, body {
   width: 100%;
   min-height: 100%;
+  overflow-x: hidden; /* safety net: no element should ever push the whole page sideways */
 }
 
 body {
@@ -100,6 +101,7 @@ a {
 .navbar-links {
   flex: 1;
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
 }
 
@@ -662,9 +664,13 @@ a {
   .results-page {
     padding: 32px 24px 60px;
   }
-}
 
-@media (max-width: 640px) {
+  /* Navbar stacking moved up to the same breakpoint where the app-shell
+     itself goes single-column. Previously this only applied at 640px,
+     leaving a 641-960px gap where the logo + 4 nav items + avatar didn't
+     fit on one row and had nowhere to wrap to, forcing the whole page
+     into horizontal scroll (every line of text clipped on the left by
+     the same amount — not an overlap bug, a sideways-scroll bug). */
   .navbar-inner {
     flex-wrap: wrap;
     padding: 12px 16px;
@@ -678,6 +684,9 @@ a {
   .navbar-tagline {
     display: none;
   }
+}
+
+@media (max-width: 640px) {
   .status-text {
     display: none;
   }
