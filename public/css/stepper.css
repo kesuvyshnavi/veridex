@@ -48,6 +48,7 @@
 
 .vrx-progress-step {
   flex: 1;
+  min-width: 0; /* allows equal-width shrinking on narrow screens — without this, a step can't shrink below its nowrap label's width, breaking the equal-width assumption the connector line's geometry depends on */
   position: relative;
   text-align: center;
 }
@@ -116,6 +117,19 @@
   font-weight: 500;
   color: var(--text-secondary);
   white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  /* On the narrowest phones, four nowrap labels ("Market Intelligence",
+     "Recommendations", etc.) can't fit as single lines even after
+     shrinking to equal widths. Letting them wrap to two lines here keeps
+     the steps genuinely equal-width, which is what the connector line
+     depends on — without this the line's positioning math breaks down. */
+  .vrx-progress-label {
+    white-space: normal;
+    line-height: 1.25;
+    max-width: 68px;
+  }
 }
 
 .vrx-progress-bar.is-compact .vrx-progress-label {
