@@ -1,7 +1,10 @@
 /* server/backend/public/css/app-status.css
-   Styles for two additions to index.html: the site footer, and the
+   Styles for three things shared across pages: the site footer, the
    submit -> analyse -> view-analysis status flow that replaces the old
-   bare spinner. Kept in its own file so style.css never has to be touched. */
+   bare spinner, and (new) a "Retry" button used whenever a request fails
+   because the server was unreachable, plus a floating "back to top"
+   button for the long single-column report pages. Kept in its own file
+   so style.css never has to be touched. */
 
 .hidden { display: none !important; }
 
@@ -102,6 +105,89 @@
   margin: 0;
   font-weight: 500;
   color: #0F172A;
+}
+
+/* ---------- retry button (network-unreachable failures only) ---------- */
+/* Used inside .form-error-box on index.html and inside the
+   "no analysis / no report" notice boxes on risk.html / recommendations.html
+   whenever the fetch() itself throws (server unreachable), as opposed to
+   a normal fallback/error response the server explained gracefully. */
+.status-retry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 9px 18px;
+  border: 1.5px solid var(--error, #DC2626);
+  background: #ffffff;
+  color: var(--error, #DC2626);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  font-family: 'Space Grotesk', sans-serif;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.status-retry-btn:hover {
+  background: var(--error, #DC2626);
+  color: #ffffff;
+}
+
+.status-retry-btn:active {
+  transform: scale(0.98);
+}
+
+.status-retry-btn::before {
+  content: '↻';
+  font-size: 0.95em;
+  line-height: 1;
+}
+
+/* ---------- back to top (floating action for long report pages) ---------- */
+.vrx-back-to-top {
+  position: fixed;
+  right: 18px;
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--accent, #4F46E5);
+  color: #ffffff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 20px -8px rgba(79, 70, 229, 0.55);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+  cursor: pointer;
+  z-index: 40;
+}
+
+.vrx-back-to-top.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.vrx-back-to-top:hover {
+  background: var(--accent-dark, #4338CA);
+}
+
+.vrx-back-to-top svg {
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .vrx-back-to-top {
+    right: 14px;
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    width: 46px;
+    height: 46px;
+  }
 }
 
 /* ---------- footer ---------- */

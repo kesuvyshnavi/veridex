@@ -633,3 +633,14 @@
   .vrx-trend-row { grid-template-columns: 40px 1fr 70px 54px; gap: 6px; }
   .vrx-meta-stats { gap: 18px; }
 }
+
+/* Narrow phones: 2-up grids get cramped once card padding + labels are
+   accounted for, so drop to a single column and stack the two header
+   action buttons instead of squeezing them side by side. */
+@media (max-width: 480px) {
+  .vrx-metrics-grid { grid-template-columns: 1fr; }
+  .vrx-metric-value { font-size: 1.2rem; }
+  .vrx-meta-actions { flex-direction: column; }
+  .vrx-meta-header { padding: 24px 20px 22px; }
+  .vrx-report-title { font-size: 1.6rem; }
+}

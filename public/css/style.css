@@ -406,7 +406,7 @@ a {
     width: 78px;
     padding-left: 8px !important;
     padding-right: 4px !important;
-    font-size: 13px;
+    font-size: 16px;
   }
 }
 
@@ -695,5 +695,30 @@ a {
   }
   .project-summary {
     padding: 22px;
+  }
+
+  /* --- Mobile touch & input fixes --- */
+  /* 16px prevents iOS Safari from auto-zooming the page on input focus */
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 16px;
+  }
+
+  /* Larger, easier-to-tap nav items and primary action */
+  .nav-item {
+    padding: 10px 14px;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .submit-btn {
+    min-height: 48px;
+  }
+
+  .profile-avatar {
+    width: 36px;
+    height: 36px;
   }
 }

@@ -58,6 +58,11 @@ async function runRiskAssessment(data) {
 
   renderMetaHeader(project, submittedAt);
 
+  // Clear any notice left over from a previous failed attempt (e.g. this
+  // is a retry) so stale error text doesn't sit visible under the status
+  // flow while the new attempt runs.
+  document.getElementById('noAnalysisNotice').classList.add('hidden');
+
   statusBox.classList.remove('hidden');
   setStepState(stepAssess, 'active', 'Evaluating risk factors…');
   setStepState(stepFeasibility, null, 'Building SWOT & feasibility…');
@@ -104,10 +109,16 @@ async function runRiskAssessment(data) {
     renderAnalysis(result.analysis);
     if (window.VeridexStepper) window.VeridexStepper.setStep(3, 'done');
   } catch (err) {
+    // fetch() itself threw — server unreachable, not a graceful server
+    // error. Only this case gets a Retry button, since re-running the
+    // exact same request is likely to succeed once connectivity returns.
     console.error('Risk analysis request failed:', err);
     setStepState(stepFeasibility, 'warn', 'Unable to reach the server');
     sessionStorage.removeItem('veridexRiskResult');
-    showNoAnalysis('Unable to reach the server. Please check your connection and try again.');
+    showNoAnalysis(
+      'Unable to reach the server. Please check your connection and try again.',
+      () => runRiskAssessment(data)
+    );
   }
 }
 
@@ -122,11 +133,29 @@ function renderMetaHeader(project, submittedAt) {
   void formatAnalyzedDate(submittedAt); // reserved for future use (kept for parity with results.js)
 }
 
-function showNoAnalysis(message) {
+// retryFn is optional — only passed for "server unreachable" failures, so
+// only those get a Retry button. Server-explained failures (fallback
+// failed, analysis missing, etc.) keep their existing plain-message
+// behaviour.
+function showNoAnalysis(message, retryFn) {
   if (window.VeridexStepper) window.VeridexStepper.setStep(3, 'warn');
   reportRoot.classList.remove('hidden');
   document.getElementById('noAnalysisText').textContent = message;
-  document.getElementById('noAnalysisNotice').classList.remove('hidden');
+
+  const notice = document.getElementById('noAnalysisNotice');
+  const existingRetryBtn = notice.querySelector('.status-retry-btn');
+  if (existingRetryBtn) existingRetryBtn.remove();
+
+  if (retryFn) {
+    const retryBtn = document.createElement('button');
+    retryBtn.type = 'button';
+    retryBtn.className = 'status-retry-btn';
+    retryBtn.textContent = 'Retry';
+    retryBtn.addEventListener('click', retryFn);
+    notice.appendChild(retryBtn);
+  }
+
+  notice.classList.remove('hidden');
   document.getElementById('capabilitiesRoot').classList.add('hidden');
 }
 

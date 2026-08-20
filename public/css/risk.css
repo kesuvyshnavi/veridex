@@ -387,3 +387,36 @@
   .rsk-category-grid { grid-template-columns: 1fr 1fr; }
   .rsk-breakdown-row { grid-template-columns: 100px 1fr 30px; }
 }
+
+/* Narrow phones: the two risk cards per row get too tight for their
+   factor lists, and the arc gauge + copy row reads better stacked and
+   centered than wrapped awkwardly side by side. */
+@media (max-width: 480px) {
+  .rsk-category-grid { grid-template-columns: 1fr; }
+
+  .rsk-gauge-row {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+  }
+  .rsk-gauge-copy {
+    width: 100%;
+    min-width: 0;
+  }
+  .rsk-gauge-label-row {
+    justify-content: center;
+  }
+
+  .rsk-swot-card {
+    padding: 18px;
+  }
+
+  .rsk-breakdown-row {
+    grid-template-columns: 90px 1fr 28px;
+    gap: 8px;
+  }
+  .rsk-breakdown-label {
+    font-size: 0.74rem;
+  }
+}

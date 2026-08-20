@@ -138,7 +138,7 @@ currencySelect.addEventListener('change', () => {
 function clearErrors() {
   document.querySelectorAll('.error-msg').forEach((el) => (el.textContent = ''));
   formErrorBox.classList.add('hidden');
-  formErrorBox.textContent = '';
+  formErrorBox.innerHTML = '';
 }
 
 // Basic client-side validation (mirrors backend validation)
@@ -204,28 +204,40 @@ function setFormDisabled(isDisabled) {
   Array.from(form.elements).forEach((el) => (el.disabled = isDisabled));
 }
 
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  clearErrors();
-  hideStatusFlow();
+// Renders the form-level error box. When isNetworkError is true and a
+// retryFn is supplied, a "Retry" button is appended so the person can
+// re-attempt the exact same submission without retyping the form —
+// used only for "server unreachable" failures, not for validation errors
+// or server-explained failures (those already have their own messaging).
+function showFormError(message, isNetworkError, retryFn) {
+  formErrorBox.innerHTML = '';
 
-  const formData = {
-    project_name: document.getElementById('project_name').value.trim(),
-    industry: document.getElementById('industry').value,
-    business_model: document.getElementById('business_model').value,
-    target_market: document.getElementById('target_market').value,
-    currency: document.getElementById('currency').value,
-    budget: document.getElementById('budget').value,
-    description: document.getElementById('description').value.trim(),
-  };
+  const text = document.createElement('p');
+  text.textContent = message;
+  text.style.margin = '0';
+  formErrorBox.appendChild(text);
 
-  // Step 1: Client-side validation
-  const errors = validateForm(formData);
-  if (Object.keys(errors).length > 0) {
-    showFieldErrors(errors);
-    return;
+  if (isNetworkError && retryFn) {
+    const retryBtn = document.createElement('button');
+    retryBtn.type = 'button';
+    retryBtn.className = 'status-retry-btn';
+    retryBtn.textContent = 'Retry';
+    retryBtn.addEventListener('click', () => {
+      formErrorBox.classList.add('hidden');
+      formErrorBox.innerHTML = '';
+      retryFn();
+    });
+    formErrorBox.appendChild(retryBtn);
   }
 
+  formErrorBox.classList.remove('hidden');
+}
+
+// Submits the given project data. Extracted from the submit handler so the
+// exact same request (with the exact same formData) can be re-run from the
+// Retry button if the server was unreachable, without the person having to
+// retype or resubmit anything.
+async function submitProject(formData) {
   try {
     setFormDisabled(true);
     resetStatusFlow();
@@ -245,12 +257,10 @@ form.addEventListener('submit', async (e) => {
 
     if (!response.ok || !result.success) {
       hideStatusFlow();
-      if (result.errors) {
-        formErrorBox.textContent = result.errors.join(' ');
-      } else {
-        formErrorBox.textContent = result.message || 'Something went wrong. Please try again.';
-      }
-      formErrorBox.classList.remove('hidden');
+      const message = result.errors
+        ? result.errors.join(' ')
+        : result.message || 'Something went wrong. Please try again.';
+      showFormError(message, false);
       return;
     }
 
@@ -283,13 +293,46 @@ form.addEventListener('submit', async (e) => {
 
     statusComplete.classList.remove('hidden');
   } catch (err) {
+    // The fetch() itself threw — the server was unreachable (offline,
+    // DNS failure, connection refused, etc.), as opposed to the server
+    // responding with an error. This is the one case that gets a Retry
+    // button, since re-running the exact same request is likely to work
+    // once connectivity is back.
     console.error('Request failed:', err);
     hideStatusFlow();
-    formErrorBox.textContent = 'Unable to reach the server. Please check your connection.';
-    formErrorBox.classList.remove('hidden');
+    showFormError(
+      'Unable to reach the server. Please check your connection.',
+      true,
+      () => submitProject(formData)
+    );
   } finally {
     setFormDisabled(false);
   }
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  clearErrors();
+  hideStatusFlow();
+
+  const formData = {
+    project_name: document.getElementById('project_name').value.trim(),
+    industry: document.getElementById('industry').value,
+    business_model: document.getElementById('business_model').value,
+    target_market: document.getElementById('target_market').value,
+    currency: document.getElementById('currency').value,
+    budget: document.getElementById('budget').value,
+    description: document.getElementById('description').value.trim(),
+  };
+
+  // Step 1: Client-side validation
+  const errors = validateForm(formData);
+  if (Object.keys(errors).length > 0) {
+    showFieldErrors(errors);
+    return;
+  }
+
+  await submitProject(formData);
 });
 
 viewAnalysisBtn.addEventListener('click', () => {

@@ -343,3 +343,28 @@
   .rec-shell { padding: 24px 16px 64px; }
   .rec-chart-row { flex-wrap: wrap; }
 }
+
+/* Narrow phones: donut + legend side-by-side gets squeezed once the
+   panel padding is accounted for, so stack and center them instead. */
+@media (max-width: 480px) {
+  .rec-chart-row {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 14px;
+    padding: 16px;
+  }
+  .rec-legend {
+    width: 100%;
+    padding-left: 0;
+  }
+  .rec-legend li {
+    justify-content: center;
+  }
+  .rec-legend-count {
+    margin-left: 8px;
+  }
+  .rec-panel {
+    padding: 16px 16px 18px;
+  }
+}

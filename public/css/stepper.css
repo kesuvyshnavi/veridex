@@ -168,4 +168,11 @@
   .vrx-progress-circle { width: 30px; height: 30px; font-size: 0.74rem; }
   .vrx-progress-label { font-size: 0.66rem; }
   .vrx-progress-step:not(:last-child)::after { top: 15px; }
+
+  /* Keep the visual circle compact but pad the actual link so the tap
+     target is closer to a comfortable thumb-sized hit area, without
+     growing the circle itself and changing the look. */
+  .vrx-progress-link {
+    padding: 6px 6px;
+  }
 }
