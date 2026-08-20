@@ -270,6 +270,7 @@ a {
 .content-inner {
   width: 100%;
   max-width: 600px;
+  min-width: 0; /* allows this flex item to actually shrink below its content's natural width on narrow screens — without this, native <select> elements with long placeholder text force the whole card wider than the viewport */
 }
 
 .page-head {
