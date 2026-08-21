@@ -153,97 +153,79 @@ function renderReport(report) {
   if (report.isFallback) {
     document.getElementById('fallbackBanner').classList.remove('hidden');
   }
-  renderDonut('priorityDonut', 'priorityLegend', report.recommendations, 'priority', PRIORITY_COLORS, [
-    'Critical',
-    'High',
-    'Medium',
-    'Low',
-  ]);
-  renderDonut('impactDonut', 'impactLegend', report.riskMitigation, 'impact', IMPACT_COLORS, [
-    'High',
-    'Medium',
-    'Low',
-  ]);
+  renderStatStrip(report);
   renderRecommendations(report.recommendations);
   renderMitigation(report.riskMitigation);
   renderAgentPipeline(report.agentTrace);
 }
 
-// ---------- Distribution donut charts (pure CSS conic-gradient, no chart
-// library) — gives the Recommendations page its first real "at a glance"
-// visualization instead of only text cards. ----------
-const PRIORITY_COLORS = {
-  Critical: '#DC2626',
-  High: '#D97706',
-  Medium: '#2563EB',
-  Low: '#94A3B8',
-};
+// ---------- Stat strip (replaces the old donut charts) ----------
+function renderStatStrip(report) {
+  const recommendations = report.recommendations || [];
+  const mitigations = report.riskMitigation || [];
+  const validationNotes = report.validationNotes || [];
 
-const IMPACT_COLORS = {
-  High: '#D97706',
-  Medium: '#2563EB',
-  Low: '#94A3B8',
-};
+  const criticalCount = recommendations.filter(
+    (r) => (r.priority || '').toLowerCase() === 'critical'
+  ).length;
 
-function renderDonut(donutId, legendId, items, key, colorMap, order) {
-  const donut = document.getElementById(donutId);
-  const legend = document.getElementById(legendId);
-  if (!donut || !legend) return;
-
-  const counts = {};
-  order.forEach((k) => (counts[k] = 0));
-  (items || []).forEach((item) => {
-    const val = item[key];
-    if (counts[val] === undefined) counts[val] = 0;
-    counts[val] += 1;
-  });
-
-  const total = Object.values(counts).reduce((a, b) => a + b, 0);
-  const totalEl = donut.querySelector('.rec-donut-total');
-  if (totalEl) totalEl.textContent = total;
-
-  if (total === 0) {
-    donut.style.setProperty('--seg', 'conic-gradient(#EEF0F6 0% 100%)');
-    legend.innerHTML = '<li>No data yet</li>';
-    return;
-  }
-
-  let cursor = 0;
-  const segments = [];
-  order.forEach((k) => {
-    const count = counts[k] || 0;
-    if (!count) return;
-    const pct = (count / total) * 100;
-    const color = colorMap[k] || '#94A3B8';
-    segments.push(`${color} ${cursor}% ${cursor + pct}%`);
-    cursor += pct;
-  });
-  donut.style.setProperty('--seg', `conic-gradient(${segments.join(', ')})`);
-
-  legend.innerHTML = order
-    .filter((k) => counts[k])
-    .map(
-      (k) => `
-      <li>
-        <span class="rec-legend-dot" style="background:${colorMap[k] || '#94A3B8'}"></span>
-        <span>${escapeHtml(k)}</span>
-        <span class="rec-legend-count">${counts[k]}</span>
-      </li>
-    `
-    )
-    .join('');
+  setText('statRecommendations', recommendations.length);
+  setText('statCritical', criticalCount);
+  setText('statMitigation', mitigations.length);
+  setText('statAutoCorrections', validationNotes.length);
 }
 
-function priorityClass(priority) {
+function setText(elementId, value) {
+  const el = document.getElementById(elementId);
+  if (el) el.textContent = value;
+}
+
+// ---------- Priority / impact -> style mappings ----------
+function priorityBorderClass(priority) {
   switch ((priority || '').toLowerCase()) {
     case 'critical':
-      return 'vrx-badge-warn';
+      return 'rec-card-critical';
     case 'high':
-      return 'vrx-badge-warn';
+      return 'rec-card-high';
     case 'medium':
-      return 'vrx-badge-info';
+      return 'rec-card-medium';
     default:
-      return 'vrx-badge-neutral';
+      return 'rec-card-low';
+  }
+}
+
+function priorityBadgeClass(priority) {
+  switch ((priority || '').toLowerCase()) {
+    case 'critical':
+      return 'rec-badge-critical';
+    case 'high':
+      return 'rec-badge-high';
+    case 'medium':
+      return 'rec-badge-medium';
+    default:
+      return 'rec-badge-low';
+  }
+}
+
+function impactBorderClass(impact) {
+  switch ((impact || '').toLowerCase()) {
+    case 'high':
+      return 'rec-card-high';
+    case 'medium':
+      return 'rec-card-medium';
+    default:
+      return 'rec-card-low';
+  }
+}
+
+function impactBadgeClass(impact) {
+  switch ((impact || '').toLowerCase()) {
+    case 'high':
+      return 'rec-badge-high';
+    case 'medium':
+      return 'rec-badge-medium';
+    default:
+      return 'rec-badge-low';
   }
 }
 
@@ -255,28 +237,18 @@ function renderRecommendations(items) {
   }
   panel.innerHTML = items
     .map(
-      (item) => `
-      <div class="rec-card">
+      (item, i) => `
+      <div class="rec-card ${priorityBorderClass(item.priority)}">
         <div class="rec-card-head">
-          <span class="rec-card-title">${escapeHtml(item.title)}</span>
-          <span class="vrx-badge ${priorityClass(item.priority)}">${escapeHtml(item.priority || '—')}</span>
+          <span class="rec-card-num">${String(i + 1).padStart(2, '0')}</span>
+          <span class="rec-badge ${priorityBadgeClass(item.priority)}">${escapeHtml(item.priority || '—')}</span>
         </div>
+        <span class="rec-card-title">${escapeHtml(item.title)}</span>
         <p class="rec-card-body">${escapeHtml(item.rationale || '')}</p>
       </div>
     `
     )
     .join('');
-}
-
-function impactClass(impact) {
-  switch ((impact || '').toLowerCase()) {
-    case 'high':
-      return 'vrx-badge-warn';
-    case 'medium':
-      return 'vrx-badge-info';
-    default:
-      return 'vrx-badge-neutral';
-  }
 }
 
 function renderMitigation(items) {
@@ -287,12 +259,13 @@ function renderMitigation(items) {
   }
   panel.innerHTML = items
     .map(
-      (item) => `
-      <div class="rec-card">
+      (item, i) => `
+      <div class="rec-card ${impactBorderClass(item.impact)}">
         <div class="rec-card-head">
-          <span class="rec-card-title">${escapeHtml(item.risk)}</span>
-          <span class="vrx-badge ${impactClass(item.impact)}">${escapeHtml(item.impact || '—')} impact</span>
+          <span class="rec-card-num">${String(i + 1).padStart(2, '0')}</span>
+          <span class="rec-badge ${impactBadgeClass(item.impact)}">${escapeHtml(item.impact || '—')} impact</span>
         </div>
+        <span class="rec-card-title">${escapeHtml(item.risk)}</span>
         <p class="rec-card-body">${escapeHtml(item.strategy || '')}</p>
       </div>
     `

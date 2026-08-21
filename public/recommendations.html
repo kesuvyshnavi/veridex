@@ -156,6 +156,26 @@
           </div>
         </section>
 
+        <!-- Stat strip -->
+        <div id="statStrip" class="rec-stat-strip">
+          <div class="rec-stat-tile rec-stat-neutral">
+            <span class="rec-stat-label">Recommendations</span>
+            <span id="statRecommendations" class="rec-stat-value">0</span>
+          </div>
+          <div class="rec-stat-tile rec-stat-critical">
+            <span class="rec-stat-label">Critical priority</span>
+            <span id="statCritical" class="rec-stat-value">0</span>
+          </div>
+          <div class="rec-stat-tile rec-stat-warn">
+            <span class="rec-stat-label">Mitigation strategies</span>
+            <span id="statMitigation" class="rec-stat-value">0</span>
+          </div>
+          <div class="rec-stat-tile rec-stat-good">
+            <span class="rec-stat-label">Auto-corrections</span>
+            <span id="statAutoCorrections" class="rec-stat-value">0</span>
+          </div>
+        </div>
+
         <div class="rec-columns">
 
           <!-- AI Recommendations -->
@@ -164,17 +184,6 @@
               <span class="rec-panel-icon rec-icon-ai">✦</span>
               <h3>AI Recommendations</h3>
             </div>
-
-            <div class="rec-chart-row">
-              <div class="rec-donut" id="priorityDonut">
-                <div class="rec-donut-center">
-                  <span class="rec-donut-total">0</span>
-                  <span class="rec-donut-label">actions</span>
-                </div>
-              </div>
-              <ul class="rec-legend" id="priorityLegend"></ul>
-            </div>
-
             <div id="recommendationsPanel" class="rec-panel-body"></div>
           </div>
 
@@ -184,17 +193,6 @@
               <span class="rec-panel-icon rec-icon-mitigation">⚠</span>
               <h3>Risk Mitigation</h3>
             </div>
-
-            <div class="rec-chart-row">
-              <div class="rec-donut" id="impactDonut">
-                <div class="rec-donut-center">
-                  <span class="rec-donut-total">0</span>
-                  <span class="rec-donut-label">strategies</span>
-                </div>
-              </div>
-              <ul class="rec-legend" id="impactLegend"></ul>
-            </div>
-
             <div id="mitigationPanel" class="rec-panel-body"></div>
           </div>
 

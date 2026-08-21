@@ -56,6 +56,49 @@
   text-decoration: underline;
 }
 
+/* ---------- stat strip (replaces the donut charts) ---------- */
+.rec-stat-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.rec-stat-tile {
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.rec-stat-label {
+  display: block;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.rec-stat-value {
+  font-family: var(--vrx-font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.rec-stat-neutral { background: #F1F3F9; }
+.rec-stat-neutral .rec-stat-label { color: var(--vrx-muted); }
+.rec-stat-neutral .rec-stat-value { color: var(--vrx-ink); }
+
+.rec-stat-critical { background: var(--vrx-bad-bg); }
+.rec-stat-critical .rec-stat-label { color: #993C1D; }
+.rec-stat-critical .rec-stat-value { color: var(--vrx-bad); }
+
+.rec-stat-warn { background: var(--vrx-warn-bg); }
+.rec-stat-warn .rec-stat-label { color: #854F0B; }
+.rec-stat-warn .rec-stat-value { color: #633806; }
+
+.rec-stat-good { background: var(--vrx-good-bg); }
+.rec-stat-good .rec-stat-label { color: #085041; }
+.rec-stat-good .rec-stat-value { color: #04342C; }
+
 /* ---------- three-column workflow layout ---------- */
 .rec-columns {
   display: grid;
@@ -107,146 +150,69 @@
   gap: 10px;
 }
 
-/* ---------- recommendation / mitigation cards ---------- */
+/* ---------- recommendation / mitigation cards (priority-bordered) ---------- */
 .rec-card {
-  border: 1px solid var(--vrx-border);
-  border-radius: 10px;
-  padding: 12px 14px;
+  border-left: 3px solid #94A3B8;
+  border-radius: 0 10px 10px 0;
+  padding: 10px 12px;
   background: #FBFBFF;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .rec-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 18px -12px rgba(79, 70, 229, 0.35);
-  border-color: #DCE0FF;
 }
+
+.rec-card-critical { border-left-color: var(--vrx-bad); }
+.rec-card-high { border-left-color: var(--vrx-warn); }
+.rec-card-medium { border-left-color: var(--vrx-info); }
+.rec-card-low { border-left-color: #94A3B8; }
 
 .rec-card-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
+.rec-card-num {
+  font-family: var(--vrx-font-mono);
+  font-size: 0.72rem;
+  color: #94A3B8;
+}
+
+.rec-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.rec-badge-critical { background: #FAECE7; color: #712B13; }
+.rec-badge-high { background: #FAEEDA; color: #854F0B; }
+.rec-badge-medium { background: var(--vrx-info-bg); color: var(--vrx-info); }
+.rec-badge-low { background: #F1EFE8; color: #444441; }
+
 .rec-card-title {
+  display: block;
   font-family: var(--vrx-font-display);
   font-weight: 700;
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   line-height: 1.4;
+  margin-bottom: 4px;
 }
 
 .rec-card-body {
   margin: 0;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   line-height: 1.5;
   color: var(--vrx-muted);
 }
 
-/* ---------- mini distribution donut charts ---------- */
-.rec-chart-row {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  padding: 18px 20px;
-  margin-bottom: 16px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--vrx-indigo-50) 0%, #FBFBFF 100%);
-  border: 1px solid #E4E7F2;
-}
-
-.rec-donut {
-  --seg: conic-gradient(#EEF0F6 0% 100%);
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: var(--seg);
-  position: relative;
-  flex: none;
-  transition: background 0.4s ease;
-  box-shadow: 0 6px 16px -8px rgba(15, 23, 42, 0.25);
-}
-
-.rec-donut::after {
-  content: '';
-  position: absolute;
-  inset: 15px;
-  border-radius: 50%;
-  background: var(--vrx-panel);
-  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.04);
-}
-
-.rec-donut-center {
-  position: absolute;
-  inset: 15px;
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 1;
-  padding: 0 4px;
-}
-
-.rec-donut-total {
-  font-family: var(--vrx-font-display);
-  font-size: 1.2rem;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.rec-donut-label {
-  font-family: var(--vrx-font-mono);
-  font-size: 0.5rem;
-  color: var(--vrx-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.01em;
-  line-height: 1.2;
-  margin-top: 3px;
-  text-align: center;
-  max-width: 56px;
-  overflow-wrap: break-word;
-}
-
-.rec-legend {
-  list-style: none;
-  margin: 0;
-  padding: 0 0 0 4px;
-  display: flex;
-  flex-direction: column;
-  gap: 11px;
-  flex: 1;
-  min-width: 0;
-}
-
-.rec-legend li {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.83rem;
-  color: var(--vrx-ink);
-}
-
-.rec-legend-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  flex: none;
-}
-
-.rec-legend-count {
-  margin-left: auto;
-  font-family: var(--vrx-font-mono);
-  font-size: 0.76rem;
-  font-weight: 600;
-  color: var(--vrx-muted);
-  background: rgba(15, 23, 42, 0.04);
-  padding: 2px 8px;
-  border-radius: 999px;
-}
-
-/* ---------- LangGraph pipeline diagram ---------- */
+/* ---------- LangGraph pipeline diagram (vertical rail) ---------- */
 .rec-pipeline {
   gap: 0;
 }
@@ -341,29 +307,10 @@
 
 @media (max-width: 640px) {
   .rec-shell { padding: 24px 16px 64px; }
-  .rec-chart-row { flex-wrap: wrap; }
+  .rec-stat-strip { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* Narrow phones: donut + legend side-by-side gets squeezed once the
-   panel padding is accounted for, so stack and center them instead. */
 @media (max-width: 480px) {
-  .rec-chart-row {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 14px;
-    padding: 16px;
-  }
-  .rec-legend {
-    width: 100%;
-    padding-left: 0;
-  }
-  .rec-legend li {
-    justify-content: center;
-  }
-  .rec-legend-count {
-    margin-left: 8px;
-  }
   .rec-panel {
     padding: 16px 16px 18px;
   }
