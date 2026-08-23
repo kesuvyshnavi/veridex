@@ -119,19 +119,6 @@
   white-space: nowrap;
 }
 
-@media (max-width: 480px) {
-  /* On the narrowest phones, four nowrap labels ("Market Intelligence",
-     "Recommendations", etc.) can't fit as single lines even after
-     shrinking to equal widths. Letting them wrap to two lines here keeps
-     the steps genuinely equal-width, which is what the connector line
-     depends on — without this the line's positioning math breaks down. */
-  .vrx-progress-label {
-    white-space: normal;
-    line-height: 1.25;
-    max-width: 68px;
-  }
-}
-
 .vrx-progress-bar.is-compact .vrx-progress-label {
   font-size: 0.68rem;
 }
@@ -188,5 +175,18 @@
      growing the circle itself and changing the look. */
   .vrx-progress-link {
     padding: 6px 6px;
+  }
+
+  /* Four nowrap labels ("Market Intelligence", "Recommendations", etc.)
+     don't reliably fit as single lines even after shrinking to equal
+     widths at typical phone widths — "Recommendations" (13 characters),
+     as the last step, has nowhere left to overflow but past the edge of
+     the screen. Wrapping to two lines here keeps every step genuinely
+     equal-width, which the connector line's positioning math depends on. */
+  .vrx-progress-label {
+    white-space: normal;
+    line-height: 1.25;
+    max-width: 68px;
+    margin: 0 auto;
   }
 }
