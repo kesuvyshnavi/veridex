@@ -4,7 +4,6 @@
 const pool = require('../db/database');
 const { getMarketAnalysis } = require('../services/aiService');
 
-// Allowed dropdown values (should match frontend dropdown options)
 const ALLOWED_INDUSTRIES = [
   'Technology', 'Healthcare', 'Finance', 'E-commerce',
   'Education', 'Agriculture', 'Manufacturing', 'Other',
@@ -51,31 +50,26 @@ async function createProject(req, res) {
     const { project_name, industry, business_model, target_market, currency, budget, description } =
       req.body;
 
-    // STEP 1: Validate
     const errors = validateProjectInput(req.body);
     if (errors.length > 0) {
       return res.status(400).json({ success: false, errors });
     }
 
-    // STEP 2: Insert into PostgreSQL
     const insertQuery = `
-      INSERT INTO projects (project_name, industry, business_model, target_market, currency, budget, description)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      INSERT INTO projects (user_id, project_name, industry, business_model, target_market, currency, budget, description)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING id;
     `;
-    const values = [project_name, industry, business_model, target_market, currency, budget, description];
+    const values = [req.userId, project_name, industry, business_model, target_market, currency, budget, description];
 
     const dbResult = await pool.query(insertQuery, values);
     const projectId = dbResult.rows[0].id;
 
-    // STEP 3: Only after successful DB insert, call ai for analysis
     let analysis;
     try {
       analysis = await getMarketAnalysis(req.body);
     } catch (aiError) {
       console.error('ai analysis failed:', aiError.message);
-      // Project is already saved successfully — inform frontend that analysis failed,
-      // but do NOT fail the whole request since DB save succeeded.
       return res.status(201).json({
         success: true,
         projectId,
@@ -83,6 +77,14 @@ async function createProject(req, res) {
         analysisError: 'Market analysis could not be generated. Please try again later.',
       });
     }
+
+    // Persist so the dashboard / PDF report can be built later without
+    // re-calling Groq. Best-effort: if this fails, the response to the
+    // user is unaffected — the project row and analysis were already
+    // generated successfully.
+    pool
+      .query('UPDATE projects SET market_analysis = $1 WHERE id = $2', [JSON.stringify(analysis), projectId])
+      .catch((err) => console.error('Failed to persist market_analysis:', err.message));
 
     return res.status(201).json({
       success: true,

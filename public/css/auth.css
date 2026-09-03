@@ -1,0 +1,78 @@
+/* server/backend/public/css/auth.css
+   Minimal layout for login.html / register.html, plus the password
+   show/hide eye-icon toggle used inside their password fields. Reuses
+   .project-form, .form-group, .submit-btn, .error-msg, .form-error-box,
+   .page-eyebrow, .page-title, .page-subtitle from style.css. */
+
+.auth-shell {
+  min-height: calc(100vh - 65px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  background: var(--paper);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+}
+
+.auth-switch {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+}
+
+.auth-switch a {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ---------- password show/hide ---------- */
+.password-input-wrap {
+  position: relative;
+}
+
+.password-input-wrap input {
+  padding-right: 42px;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+.password-toggle-btn:hover {
+  color: var(--accent);
+  background: var(--accent-light);
+}
+
+.password-toggle-btn.is-visible {
+  color: var(--accent);
+}
+
+.password-toggle-btn .eye-off-icon {
+  display: none;
+}
+
+.password-toggle-btn.is-visible .eye-icon {
+  display: none;
+}
+
+.password-toggle-btn.is-visible .eye-off-icon {
+  display: block;
+}
