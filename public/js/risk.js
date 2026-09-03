@@ -9,6 +9,10 @@
 // the Strategic Reasoning prompt in real risk data without re-running this
 // engine. On a failed run, that cache is cleared so stale data never leaks
 // into Milestone 3.
+//
+// Milestone 4 addition: the project's DB id (projectId) is sent along with
+// the request so the backend can persist this result against the correct,
+// owned project row for the dashboard/report to read later.
 
 const GAUGE_PATH_LENGTH = 226; // matches the arc path length used in risk.html
 
@@ -54,7 +58,7 @@ if (!raw) {
 }
 
 async function runRiskAssessment(data) {
-  const { project, submittedAt } = data;
+  const { project, submittedAt, projectId } = data;
 
   renderMetaHeader(project, submittedAt);
 
@@ -71,7 +75,8 @@ async function runRiskAssessment(data) {
     const response = await fetch('/api/risk-analysis', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(project),
+      credentials: 'same-origin',
+      body: JSON.stringify({ ...project, projectId }),
     });
     const result = await response.json();
 

@@ -732,3 +732,119 @@ a {
     height: 36px;
   }
 }
+/* ---------- profile dropdown ---------- */
+.profile-menu {
+  position: relative;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  min-width: 240px;
+  background: var(--ink-soft, #1E1B2E);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.45);
+  padding: 14px;
+  z-index: 50;
+  animation: profile-dropdown-in 0.15s ease;
+}
+
+@keyframes profile-dropdown-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.profile-dropdown-email {
+  color: #A6AFC7;
+  font-size: 12.5px;
+  font-family: 'IBM Plex Mono', monospace;
+  padding: 4px 10px 12px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  word-break: break-all;
+}
+
+.profile-dropdown-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 10px;
+  border-radius: 8px;
+  color: #E4E7F2;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: background-color 0.15s ease;
+}
+
+.profile-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.profile-dropdown-danger {
+  color: #F87171;
+}
+
+.profile-dropdown-danger:hover {
+  background: rgba(220, 38, 38, 0.12);
+}
+
+/* ---------- inline logout confirmation ---------- */
+.profile-dropdown-confirm {
+  padding: 6px 10px 2px;
+}
+
+.profile-dropdown-confirm > span {
+  display: block;
+  color: #E4E7F2;
+  font-size: 13.5px;
+  margin-bottom: 12px;
+}
+
+.profile-dropdown-confirm-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.profile-dropdown-confirm-yes,
+.profile-dropdown-confirm-no {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Space Grotesk', sans-serif;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform 0.1s ease, background-color 0.15s ease;
+}
+
+.profile-dropdown-confirm-yes {
+  background: #DC2626;
+  color: #fff;
+}
+
+.profile-dropdown-confirm-yes:hover {
+  background: #B91C1C;
+}
+
+.profile-dropdown-confirm-no {
+  background: rgba(255, 255, 255, 0.08);
+  color: #C7CEE8;
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.profile-dropdown-confirm-no:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.profile-dropdown-confirm-yes:active,
+.profile-dropdown-confirm-no:active {
+  transform: scale(0.98);
+}

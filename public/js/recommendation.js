@@ -4,6 +4,10 @@
 // market analysis) from main.js and veridexRiskResult (Milestone 2 output,
 // if present) from risk.js, then calls POST /api/recommendations, which
 // runs a LangGraph.js agent workflow server-side.
+//
+// Milestone 4 addition: the project's DB id (projectId) is sent along with
+// the request so the backend can persist this result against the correct,
+// owned project row for the dashboard/report to read later.
 
 function escapeHtml(str) {
   const div = document.createElement('div');
@@ -51,7 +55,7 @@ function getCachedRiskAnalysis() {
 }
 
 async function runRecommendationWorkflow(data) {
-  const { project, submittedAt } = data;
+  const { project, submittedAt, projectId } = data;
   const riskAnalysis = getCachedRiskAnalysis();
 
   renderMetaHeader(project, submittedAt, !!riskAnalysis);
@@ -69,7 +73,8 @@ async function runRecommendationWorkflow(data) {
     const response = await fetch('/api/recommendations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ project, riskAnalysis }),
+      credentials: 'same-origin',
+      body: JSON.stringify({ project, riskAnalysis, projectId }),
     });
     const result = await response.json();
 
