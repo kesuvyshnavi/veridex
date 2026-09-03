@@ -1,5 +1,6 @@
-// server/controllers/projectController.js
-// Handles validation, DB insertion, and triggering ai analysis
+// server/backend/controllers/projectController.js
+// Handles validation, DB insertion, triggering AI analysis, and (M4)
+// listing/viewing/deleting the logged-in user's own projects.
 
 const pool = require('../db/database');
 const { getMarketAnalysis } = require('../services/aiService');
@@ -78,10 +79,6 @@ async function createProject(req, res) {
       });
     }
 
-    // Persist so the dashboard / PDF report can be built later without
-    // re-calling Groq. Best-effort: if this fails, the response to the
-    // user is unaffected — the project row and analysis were already
-    // generated successfully.
     pool
       .query('UPDATE projects SET market_analysis = $1 WHERE id = $2', [JSON.stringify(analysis), projectId])
       .catch((err) => console.error('Failed to persist market_analysis:', err.message));
@@ -100,4 +97,72 @@ async function createProject(req, res) {
   }
 }
 
-module.exports = { createProject };
+// GET /api/projects — list only the logged-in user's own projects, newest
+// first. Returns the persisted analyses too, so the dashboard can show
+// quick-glance scores without re-calling any AI engine.
+async function listProjects(req, res) {
+  try {
+    const result = await pool.query(
+      `SELECT id, project_name, industry, business_model, target_market, currency, budget,
+              created_at, market_analysis, risk_analysis, recommendations
+       FROM projects
+       WHERE user_id = $1
+       ORDER BY created_at DESC`,
+      [req.userId]
+    );
+
+    return res.status(200).json({ success: true, projects: result.rows });
+  } catch (err) {
+    console.error('Error in listProjects:', err.message);
+    return res.status(500).json({ success: false, message: 'Something went wrong while loading your projects.' });
+  }
+}
+
+// GET /api/projects/:id — a single project, ownership-checked. Used by the
+// consolidated report view.
+async function getProject(req, res) {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(
+      `SELECT id, project_name, industry, business_model, target_market, currency, budget,
+              description, created_at, market_analysis, risk_analysis, recommendations
+       FROM projects
+       WHERE id = $1 AND user_id = $2`,
+      [id, req.userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Project not found.' });
+    }
+
+    return res.status(200).json({ success: true, project: result.rows[0] });
+  } catch (err) {
+    console.error('Error in getProject:', err.message);
+    return res.status(500).json({ success: false, message: 'Something went wrong while loading this project.' });
+  }
+}
+
+// DELETE /api/projects/:id — ownership-checked; only deletes if the row
+// actually belongs to the logged-in user.
+async function deleteProject(req, res) {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query('DELETE FROM projects WHERE id = $1 AND user_id = $2 RETURNING id', [
+      id,
+      req.userId,
+    ]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Project not found.' });
+    }
+
+    return res.status(200).json({ success: true, deletedId: result.rows[0].id });
+  } catch (err) {
+    console.error('Error in deleteProject:', err.message);
+    return res.status(500).json({ success: false, message: 'Something went wrong while deleting this project.' });
+  }
+}
+
+module.exports = { createProject, listProjects, getProject, deleteProject };

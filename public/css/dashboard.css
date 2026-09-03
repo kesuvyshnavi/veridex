@@ -1,0 +1,250 @@
+/* server/backend/public/css/dashboard.css
+   Styles for the Risk Analytics Dashboard (dashboard.html, Milestone 4).
+   Shares the "vrx-" design tokens from results.css but introduces its own
+   card grid so a multi-project list reads distinctly from a single-project
+   report page. */
+
+.dsh-shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 40px 24px 96px;
+  font-family: var(--vrx-font-body);
+  color: var(--vrx-ink);
+}
+
+.dsh-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.dsh-title {
+  font-family: var(--vrx-font-display);
+  font-size: clamp(1.7rem, 3vw, 2.2rem);
+  font-weight: 700;
+  margin: 4px 0 8px;
+}
+
+.dsh-subtitle {
+  color: var(--vrx-muted);
+  font-size: 0.92rem;
+  max-width: 560px;
+  margin: 0;
+}
+
+/* ---------- loading / error states ---------- */
+.dsh-loading {
+  text-align: center;
+  padding: 80px 24px;
+  color: var(--vrx-muted);
+}
+
+.dsh-error {
+  text-align: center;
+  padding: 48px 24px;
+  background: var(--vrx-bad-bg);
+  border: 1px solid #F8CFCF;
+  border-radius: 14px;
+  color: var(--vrx-bad);
+}
+
+.dsh-error p {
+  margin-bottom: 14px;
+}
+
+/* ---------- project grid ---------- */
+.dsh-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 18px;
+}
+
+.dsh-card {
+  background: var(--vrx-panel);
+  border: 1px solid var(--vrx-border);
+  border-radius: 16px;
+  padding: 22px 22px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dsh-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.dsh-card-title {
+  font-family: var(--vrx-font-display);
+  font-size: 1.08rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+  line-height: 1.3;
+}
+
+.dsh-card-date {
+  font-family: var(--vrx-font-mono);
+  font-size: 0.7rem;
+  color: var(--vrx-muted);
+  white-space: nowrap;
+}
+
+.dsh-tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* ---------- engine status badges ---------- */
+.dsh-badge-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dsh-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 9px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dsh-badge-done { background: var(--vrx-good-bg); color: var(--vrx-good); }
+.dsh-badge-pending { background: #F1F3F9; color: var(--vrx-muted); }
+
+/* ---------- quick score row ---------- */
+.dsh-score-row {
+  display: flex;
+  gap: 18px;
+  padding: 12px 0;
+  border-top: 1px solid var(--vrx-border);
+  border-bottom: 1px solid var(--vrx-border);
+}
+
+.dsh-score-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dsh-score-label {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--vrx-muted);
+}
+
+.dsh-score-value {
+  font-family: var(--vrx-font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.dsh-score-value.score-good { color: var(--vrx-good); }
+.dsh-score-value.score-mid { color: var(--vrx-warn); }
+.dsh-score-value.score-bad { color: var(--vrx-bad); }
+
+/* ---------- summary expand panel ---------- */
+.dsh-summary-panel {
+  background: var(--vrx-indigo-50);
+  border: 1px solid #DCE0FF;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+
+.dsh-summary-panel p {
+  margin: 0 0 6px;
+}
+
+.dsh-summary-panel p:last-child {
+  margin-bottom: 0;
+}
+
+.dsh-summary-label {
+  font-weight: 600;
+  color: var(--vrx-indigo);
+}
+
+/* ---------- card action row ---------- */
+.dsh-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.dsh-btn {
+  flex: 1;
+  text-align: center;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--vrx-border);
+  background: var(--vrx-panel);
+  color: var(--vrx-indigo);
+  font-family: inherit;
+}
+
+.dsh-btn:hover {
+  border-color: var(--vrx-indigo);
+}
+
+.dsh-btn-danger {
+  color: var(--vrx-bad);
+}
+
+.dsh-btn-danger:hover {
+  border-color: var(--vrx-bad);
+  background: var(--vrx-bad-bg);
+}
+
+/* ---------- inline two-step delete confirm ---------- */
+.dsh-confirm-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.dsh-confirm-text {
+  flex: 1;
+  color: var(--vrx-bad);
+  font-weight: 600;
+}
+
+.dsh-confirm-yes,
+.dsh-confirm-no {
+  padding: 8px 12px;
+  border-radius: 7px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  border: 1px solid transparent;
+}
+
+.dsh-confirm-yes {
+  background: var(--vrx-bad);
+  color: #fff;
+}
+
+.dsh-confirm-no {
+  background: #F1F3F9;
+  color: var(--vrx-ink);
+}
+
+@media (max-width: 640px) {
+  .dsh-shell { padding: 24px 16px 64px; }
+  .dsh-grid { grid-template-columns: 1fr; }
+}

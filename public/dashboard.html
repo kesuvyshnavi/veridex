@@ -1,0 +1,128 @@
+<!-- server/backend/public/dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light only">
+  <title>Veridex — My Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="icon" href="/favicon.ico?v=2" sizes="any">
+  <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2">
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/app-status.css" />
+  <link rel="stylesheet" href="/css/results.css" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
+</head>
+<body data-page="dashboard" data-require-auth="true">
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-left">
+        <svg class="brand-mark" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="vrxGradNav" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#6D5CFF"/>
+              <stop offset="0.5" stop-color="#4F46E5"/>
+              <stop offset="1" stop-color="#3730A3"/>
+            </linearGradient>
+            <radialGradient id="vrxSheenNav" cx="13" cy="9" r="11" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#FFFFFF" stop-opacity="0.45"/>
+              <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <rect width="40" height="40" rx="11" fill="url(#vrxGradNav)"/>
+          <rect width="40" height="40" rx="11" fill="url(#vrxSheenNav)"/>
+          <path d="M11.5 20.5L17 26L29 12.5" fill="none" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="brand-text">
+          <span class="navbar-brand">Veridex</span>
+          <span class="navbar-tagline">Failure Prediction AI</span>
+        </div>
+      </div>
+
+      <div class="navbar-links">
+        <a href="index.html" class="nav-item">Project Input</a>
+      </div>
+
+      <div class="navbar-right">
+        <div class="profile-avatar" title="Guest User">V</div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="dsh-shell">
+
+    <header class="dsh-header">
+      <div>
+        <p class="vrx-eyebrow">Risk Analytics Dashboard</p>
+        <h1 class="dsh-title">My Projects</h1>
+        <p class="dsh-subtitle">Every project you've submitted, with its Market, Risk, and Recommendations status at a glance.</p>
+      </div>
+      <a href="index.html" class="vrx-btn-primary">+ New Analysis</a>
+    </header>
+
+    <div id="loadingState" class="dsh-loading">
+      <div class="spinner"></div>
+      <p>Loading your projects…</p>
+    </div>
+
+    <div id="emptyState" class="vrx-empty hidden">
+      <p>You haven't submitted any projects yet.</p>
+      <a href="index.html" class="vrx-btn-primary">Start Your First Analysis</a>
+    </div>
+
+    <div id="errorState" class="dsh-error hidden">
+      <p id="errorText">Something went wrong while loading your projects.</p>
+      <button type="button" id="retryBtn" class="status-retry-btn">Retry</button>
+    </div>
+
+    <div id="projectGrid" class="dsh-grid hidden"></div>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer-inner site-footer-inner-solo">
+      <div class="site-footer-brand">
+        <svg class="brand-mark brand-mark-sm" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="vrxGradFoot" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#6D5CFF"/>
+              <stop offset="0.5" stop-color="#4F46E5"/>
+              <stop offset="1" stop-color="#3730A3"/>
+            </linearGradient>
+            <radialGradient id="vrxSheenFoot" cx="13" cy="9" r="11" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#FFFFFF" stop-opacity="0.45"/>
+              <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <rect width="40" height="40" rx="11" fill="url(#vrxGradFoot)"/>
+          <rect width="40" height="40" rx="11" fill="url(#vrxSheenFoot)"/>
+          <path d="M11.5 20.5L17 26L29 12.5" fill="none" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div>
+          <span class="site-footer-brand-name">Veridex</span>
+          <p class="site-footer-tagline">Failure Prediction AI — Startup &amp; Project Risk Analyzer</p>
+        </div>
+      </div>
+
+      <a href="https://github.com/kesuvyshnavi/veridex" target="_blank" rel="noopener" class="site-footer-github">
+        <svg viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+        </svg>
+        <span>View Source on GitHub</span>
+      </a>
+    </div>
+
+    <div class="site-footer-bottom">
+      <span>&copy; 2026 Veridex. Built for the Infosys Springboard internship program.</span>
+    </div>
+  </footer>
+
+  <script src="/js/auth-common.js"></script>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>
