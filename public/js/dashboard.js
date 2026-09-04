@@ -193,24 +193,34 @@ function attachCardHandlers(projects) {
         </div>
       `;
 
-      actions.querySelector('[data-confirm-yes]').addEventListener('click', async () => {
+            actions.querySelector('[data-confirm-yes]').addEventListener('click', async () => {
+        const yesBtn = actions.querySelector('[data-confirm-yes]');
+        if (yesBtn) yesBtn.disabled = true;
         try {
           const res = await fetch(`/api/projects/${projectId}`, {
             method: 'DELETE',
             credentials: 'same-origin',
           });
           const result = await res.json();
+
           if (!res.ok || !result.success) {
-            alert(result.message || 'Could not delete this project.');
+            // A 404 here almost always means this project belongs to a
+            // different logged-in account than the one currently active.
+            console.error('Delete failed:', result.message);
+            alert(result.message || 'Could not delete this project. It may belong to a different account.');
+            if (yesBtn) yesBtn.disabled = false;
             return;
           }
-          card.remove();
-          if (!document.querySelector('.dsh-card')) {
-            showOnly(emptyState);
-          }
+
+          console.log(`Deleted project ${result.deletedId} from the database.`);
+
+          // Re-fetch from the server instead of trusting local removal —
+          // this always shows the DB's real state.
+          await loadProjects();
         } catch (err) {
           console.error('Delete failed:', err);
           alert('Unable to reach the server. Please try again.');
+          if (yesBtn) yesBtn.disabled = false;
         }
       });
 

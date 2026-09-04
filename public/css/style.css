@@ -52,6 +52,7 @@ a {
   background-color: var(--ink);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   width: 100%;
+  position: relative;
 }
 
 .navbar-inner {
@@ -125,6 +126,22 @@ a {
   gap: 14px;
   flex-shrink: 0;
 }
+/* ---------- Hamburger menu (mobile nav only) ---------- */
+.navbar-hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: #E4E7F2;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.navbar-hamburger:hover { background: rgba(255, 255, 255, 0.08); }
+.navbar-hamburger svg { pointer-events: none; }
 
 .profile-avatar {
   width: 32px;
@@ -672,16 +689,44 @@ a {
      fit on one row and had nowhere to wrap to, forcing the whole page
      into horizontal scroll (every line of text clipped on the left by
      the same amount — not an overlap bug, a sideways-scroll bug). */
-  .navbar-inner {
-    flex-wrap: wrap;
+    .navbar-inner {
+    flex-wrap: nowrap;
     padding: 12px 16px;
     gap: 12px;
   }
-  .navbar-links {
-    order: 3;
-    width: 100%;
-    justify-content: flex-start;
+
+  .navbar-hamburger {
+    display: flex;
   }
+
+  .navbar-links {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex: none;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 4px;
+    background: var(--ink-soft, #1E1B2E);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 16px 16px;
+    box-shadow: 0 16px 32px -12px rgba(0, 0, 0, 0.5);
+    z-index: 55;
+    display: none;
+  }
+
+  .navbar-links.is-open {
+    display: flex;
+  }
+
+  .navbar-links .nav-item {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 8px;
+  }
+
   .navbar-tagline {
     display: none;
   }

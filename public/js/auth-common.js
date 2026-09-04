@@ -1,11 +1,9 @@
 // server/backend/public/js/auth-common.js
 // Loaded on every page. Checks login state via GET /api/auth/me and
-// updates the navbar's .navbar-right accordingly: Log in/Sign up links
-// when logged out, or a single avatar button when logged in that opens a
-// dropdown with a two-step "Log out" (no browser popup — confirmation
-// happens inline inside the dropdown itself).
-// Also gates pages marked data-require-auth="true", and wires up any
-// password show/hide eye-icon buttons present on the page.
+// updates the navbar's .navbar-right accordingly, gates auth-required
+// pages, wires password show/hide, and (mobile only) injects a hamburger
+// button that turns .navbar-links into a dropdown menu. Desktop layout is
+// untouched — the hamburger only renders below the 960px breakpoint via CSS.
 
 (function () {
   async function fetchCurrentUser() {
@@ -51,8 +49,6 @@
       if (!btn) return;
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        // Step 1 -> Step 2: swap the button for an inline confirmation
-        // row, right inside the dropdown. No browser confirm() popup.
         logoutSection.innerHTML = `
           <div class="profile-dropdown-confirm">
             <span>Log out of Veridex?</span>
@@ -78,8 +74,6 @@
     function closeDropdown() {
       dropdown.classList.add('hidden');
       avatarBtn.setAttribute('aria-expanded', 'false');
-      // Reset the logout section back to the plain button whenever the
-      // menu closes, so a half-finished confirmation never lingers.
       logoutSection.innerHTML = logoutButtonHtml();
       attachLogoutTrigger();
     }
@@ -104,9 +98,6 @@
     attachLogoutTrigger();
   }
 
-  // Wires up any .password-toggle-btn present on the page (login.html,
-  // register.html) to flip its target input between type="password" and
-  // type="text", swapping the eye/eye-off icon.
   function initPasswordToggles() {
     document.querySelectorAll('.password-toggle-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -121,8 +112,48 @@
     });
   }
 
+  // Injects a hamburger button into .navbar-inner (as a sibling of
+  // .navbar-right, so it survives .navbar-right's innerHTML being
+  // replaced by renderLoggedIn/renderLoggedOut) and wires it to toggle
+  // .navbar-links into a mobile dropdown. Only does anything on pages
+  // that actually have a .navbar-links element (index, results, risk,
+  // recommendations, dashboard, report) — home/login/register are
+  // untouched. Purely additive on desktop: the button itself is
+  // display:none above 960px via CSS, so desktop layout never changes.
+  function initNavbarHamburger() {
+    const inner = document.querySelector('.navbar-inner');
+    const links = document.querySelector('.navbar-links');
+    if (!inner || !links) return;
+    if (document.getElementById('navbarHamburgerBtn')) return;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.id = 'navbarHamburgerBtn';
+    btn.className = 'navbar-hamburger';
+    btn.setAttribute('aria-label', 'Menu');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.innerHTML = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>`;
+
+    const right = document.querySelector('.navbar-right');
+    inner.insertBefore(btn, right || null);
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = links.classList.toggle('is-open');
+      btn.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    document.addEventListener('click', (e) => {
+      if (links.classList.contains('is-open') && !links.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+        links.classList.remove('is-open');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
   async function init() {
     initPasswordToggles();
+    initNavbarHamburger();
 
     const navbarRight = document.querySelector('.navbar-right');
     const user = await fetchCurrentUser();
@@ -135,8 +166,6 @@
       }
     }
 
-    // index.html sets data-require-auth="true" — bounce logged-out
-    // visitors to login.html rather than showing a form that will 401.
     if (document.body.getAttribute('data-require-auth') === 'true' && !user) {
       window.location.href = 'login.html';
     }
