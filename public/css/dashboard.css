@@ -244,7 +244,54 @@
   color: var(--vrx-ink);
 }
 
+@media (max-width: 960px) {
+  .dsh-header {
+    align-items: stretch;
+  }
+  .dsh-header > a.vrx-btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 @media (max-width: 640px) {
   .dsh-shell { padding: 24px 16px 64px; }
   .dsh-grid { grid-template-columns: 1fr; }
+  .dsh-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+}
+
+/* Narrow phones: card padding, score row, and action buttons get tight
+   once the grid is already single-column — same pattern as the
+   results/risk/recommendation breakpoints. */
+@media (max-width: 480px) {
+  .dsh-card {
+    padding: 18px 18px 16px;
+    gap: 12px;
+  }
+  .dsh-card-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .dsh-score-row {
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .dsh-card-actions {
+    flex-direction: column;
+  }
+  .dsh-btn {
+    min-height: 40px;
+  }
+  .dsh-confirm-row {
+    flex-wrap: wrap;
+  }
+  .dsh-confirm-text {
+    width: 100%;
+    margin-bottom: 6px;
+  }
 }
