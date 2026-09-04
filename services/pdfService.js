@@ -166,17 +166,31 @@ function competitorCard(doc, c) {
   doc.font('Helvetica').fillColor(INK).fontSize(9.5);
 }
 
-// Two-column grid state is tracked as scratch properties on the doc object
-// itself, reset before each grid and finalized after — avoids threading
-// extra state through every call.
-function riskCategoryCard(doc, label, cat) {
+// ---------- Two-column grid helper (row-based page breaks) ----------
+// Draws entries two at a time, checking space for the WHOLE row before
+// drawing either card, so a row is never split across a page boundary —
+// this is what previously caused orphaned single cards and near-empty
+// trailing pages.
+function twoColumnGrid(doc, entries, cardHeight, gap, renderCard) {
   const usableWidth = doc.page.width - PAGE_MARGIN * 2;
-  const width = (usableWidth - 10) / 2;
-  ensureSpace(doc, 90);
-  const x = doc.__riskCol === 1 ? PAGE_MARGIN + width + 10 : PAGE_MARGIN;
-  const y = doc.__riskColY || doc.y;
-  const color = levelColor(cat.level);
+  const colWidth = (usableWidth - gap) / 2;
 
+  for (let i = 0; i < entries.length; i += 2) {
+    ensureSpace(doc, cardHeight + 10);
+    const y = doc.y;
+    renderCard(doc, PAGE_MARGIN, y, colWidth, entries[i]);
+    if (entries[i + 1]) {
+      renderCard(doc, PAGE_MARGIN + colWidth + gap, y, colWidth, entries[i + 1]);
+    }
+    doc.y = y + cardHeight + 10;
+    doc.x = PAGE_MARGIN;
+  }
+  doc.font('Helvetica').fillColor(INK).fontSize(9.5);
+}
+
+function drawRiskCard(doc, x, y, width, entry) {
+  const { label, cat } = entry;
+  const color = levelColor(cat.level);
   doc.roundedRect(x, y, width, 78, 6).fillAndStroke('#FFFFFF', BORDER);
   doc.roundedRect(x, y, 4, 78, 2).fill(color);
   doc.fillColor(INK).font('Helvetica-Bold').fontSize(9).text(label, x + 14, y + 10, { width: width - 24 });
@@ -185,53 +199,17 @@ function riskCategoryCard(doc, label, cat) {
   (cat.factors || []).slice(0, 3).forEach((f, i) => {
     doc.text(`• ${clean(f)}`, x + 14, y + 38 + i * 12, { width: width - 24 });
   });
-
-  if (doc.__riskCol === 1) {
-    doc.__riskCol = 0;
-    doc.__riskColY = y + 88;
-    doc.x = PAGE_MARGIN;
-    doc.y = doc.__riskColY;
-  } else {
-    doc.__riskCol = 1;
-    doc.__riskColY = y;
-  }
 }
 
-function finishRiskGrid(doc) {
-  doc.__riskCol = 0;
-  doc.__riskColY = null;
-  doc.font('Helvetica').fillColor(INK).fontSize(9.5);
-}
-
-function swotQuadrant(doc, label, items, bg, border) {
-  const usableWidth = doc.page.width - PAGE_MARGIN * 2;
-  const width = (usableWidth - 10) / 2;
+function drawSwotCard(doc, x, y, width, entry) {
+  const { label, items, bg, border } = entry;
   const height = 100;
-  const x = doc.__swotCol === 1 ? PAGE_MARGIN + width + 10 : PAGE_MARGIN;
-  const y = doc.__swotColY || doc.y;
-
   doc.roundedRect(x, y, width, height, 6).fillAndStroke(bg, border);
   doc.fillColor(INK).font('Helvetica-Bold').fontSize(9).text(label, x + 12, y + 10);
   doc.fillColor(INK).font('Helvetica').fontSize(7.6);
   (items || []).slice(0, 4).forEach((item, i) => {
     doc.text(`• ${clean(item)}`, x + 12, y + 26 + i * 17, { width: width - 24 });
   });
-
-  if (doc.__swotCol === 1) {
-    doc.__swotCol = 0;
-    doc.__swotColY = y + height + 10;
-    doc.x = PAGE_MARGIN;
-    doc.y = doc.__swotColY;
-  } else {
-    doc.__swotCol = 1;
-    doc.__swotColY = y;
-  }
-}
-
-function finishSwotGrid(doc) {
-  doc.__swotCol = 0;
-  doc.__swotColY = null;
-  doc.font('Helvetica').fillColor(INK).fontSize(9.5);
 }
 
 function priorityColor(priority) {
@@ -329,23 +307,21 @@ function renderRiskSection(doc, analysis) {
   if (analysis.riskCategories) {
     subheading(doc, 'Risk Categories');
     const labels = { businessRisk: 'Business Risk', financialRisk: 'Financial Risk', operationalRisk: 'Operational Risk', technicalRisk: 'Technical Risk' };
-    doc.__riskCol = 0;
-    doc.__riskColY = null;
-    Object.keys(labels).forEach((key) => {
-      if (analysis.riskCategories[key]) riskCategoryCard(doc, labels[key], analysis.riskCategories[key]);
-    });
-    finishRiskGrid(doc);
+    const entries = Object.keys(labels)
+      .filter((key) => analysis.riskCategories[key])
+      .map((key) => ({ label: labels[key], cat: analysis.riskCategories[key] }));
+    twoColumnGrid(doc, entries, 78, 10, drawRiskCard);
   }
 
   if (analysis.swot) {
     subheading(doc, 'SWOT Analysis');
-    doc.__swotCol = 0;
-    doc.__swotColY = null;
-    swotQuadrant(doc, 'STRENGTHS', analysis.swot.strengths, GOOD_BG, '#CDF0DA');
-    swotQuadrant(doc, 'WEAKNESSES', analysis.swot.weaknesses, BAD_BG, '#F8CFCF');
-    swotQuadrant(doc, 'OPPORTUNITIES', analysis.swot.opportunities, INFO_BG, '#CBDBFC');
-    swotQuadrant(doc, 'THREATS', analysis.swot.threats, WARN_BG, '#FCEAC1');
-    finishSwotGrid(doc);
+    const entries = [
+      { label: 'STRENGTHS', items: analysis.swot.strengths, bg: GOOD_BG, border: '#CDF0DA' },
+      { label: 'WEAKNESSES', items: analysis.swot.weaknesses, bg: BAD_BG, border: '#F8CFCF' },
+      { label: 'OPPORTUNITIES', items: analysis.swot.opportunities, bg: INFO_BG, border: '#CBDBFC' },
+      { label: 'THREATS', items: analysis.swot.threats, bg: WARN_BG, border: '#FCEAC1' },
+    ];
+    twoColumnGrid(doc, entries, 100, 10, drawSwotCard);
   }
 
   if (analysis.feasibility) {
@@ -394,6 +370,44 @@ function drawFooters(doc) {
   }
 }
 
+// ---------- Centered cover header ----------
+function renderHeader(doc, project) {
+  const width = doc.page.width - PAGE_MARGIN * 2;
+
+  doc.fillColor(INDIGO).font('Helvetica-Bold').fontSize(15)
+    .text('VERIDEX', PAGE_MARGIN, PAGE_MARGIN, { width, align: 'center', characterSpacing: 1.5 });
+
+  doc.moveDown(0.15);
+  doc.fillColor(MUTED).font('Helvetica-Bold').fontSize(8)
+    .text('COMPREHENSIVE ASSESSMENT REPORT', { width, align: 'center', characterSpacing: 1.2 });
+
+  doc.moveDown(0.5);
+  doc.fillColor(INK).font('Helvetica-Bold').fontSize(21)
+    .text(project.project_name || 'Untitled Project', { width, align: 'center' });
+
+  doc.moveDown(0.25);
+  const tags = [project.industry, project.business_model, project.target_market, project.budget]
+    .filter(Boolean)
+    .map(clean);
+  doc.fillColor(MUTED).font('Helvetica').fontSize(9)
+    .text(tags.join('   •   '), { width, align: 'center' });
+
+  doc.moveDown(0.1);
+  doc.fillColor(MUTED).font('Helvetica').fontSize(7.5)
+    .text(`Generated ${new Date().toLocaleDateString()}`, { width, align: 'center' });
+
+  doc.moveDown(0.6);
+  const lineY = doc.y;
+  doc.moveTo(PAGE_MARGIN, lineY).lineTo(doc.page.width - PAGE_MARGIN, lineY).strokeColor(INDIGO).lineWidth(2).stroke();
+  doc.y = lineY + 14;
+  doc.x = PAGE_MARGIN;
+
+  if (project.description) {
+    doc.fillColor(INK).font('Helvetica-Oblique').fontSize(9)
+      .text(clean(project.description), PAGE_MARGIN, doc.y, { width, align: 'left' });
+  }
+}
+
 /**
  * Streams a complete PDF report directly to the given writable stream (an
  * Express response object).
@@ -402,36 +416,17 @@ function generateProjectPdf(project, outputStream) {
   const doc = new PDFDocument({ margin: PAGE_MARGIN, size: 'A4', bufferPages: true });
   doc.pipe(outputStream);
 
-  doc.fillColor(INDIGO).fontSize(20).font('Helvetica-Bold').text('VERIDEX', PAGE_MARGIN, PAGE_MARGIN, { continued: true });
-  doc.fillColor(MUTED).fontSize(10).font('Helvetica').text('   Comprehensive Assessment Report');
-  doc.moveDown(0.2);
-  doc.fillColor(INK).fontSize(17).font('Helvetica-Bold').text(project.project_name || 'Untitled Project');
-
-  const tags = [project.industry, project.business_model, project.target_market, project.budget]
-    .filter(Boolean)
-    .map(clean);
-  doc.fillColor(MUTED).fontSize(8.5).font('Helvetica').text(tags.join('   •   '));
-  doc.fillColor(MUTED).fontSize(7.5).text(`Generated ${new Date().toLocaleDateString()}`);
-  doc.moveDown(0.5);
-
-  if (project.description) {
-    doc.fillColor(INK).fontSize(9).font('Helvetica-Oblique').text(clean(project.description));
-  }
-
-  const topLineY = doc.y + 8;
-  doc.moveTo(PAGE_MARGIN, topLineY).lineTo(doc.page.width - PAGE_MARGIN, topLineY).strokeColor(INDIGO).lineWidth(2).stroke();
-  doc.y = topLineY + 14;
-  doc.x = PAGE_MARGIN;
+  renderHeader(doc, project);
 
   renderMarketSection(doc, project.market_analysis);
   renderRiskSection(doc, project.risk_analysis);
   renderRecommendationsSection(doc, project.recommendations);
 
-  ensureSpace(doc, 40);
-  doc.moveDown(1);
   doc.fillColor(MUTED).fontSize(7.5).font('Helvetica').text(
     'AI-assisted analysis. Verify figures independently before making business decisions.',
-    { align: 'center' }
+    PAGE_MARGIN,
+    doc.y + 10,
+    { width: doc.page.width - PAGE_MARGIN * 2, align: 'center' }
   );
 
   drawFooters(doc);
