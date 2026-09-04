@@ -4,6 +4,7 @@
 
 const pool = require('../db/database');
 const { getMarketAnalysis } = require('../services/aiService');
+const { generateProjectPdf } = require('../services/pdfService');
 
 const ALLOWED_INDUSTRIES = [
   'Technology', 'Healthcare', 'Finance', 'E-commerce',
@@ -165,4 +166,34 @@ async function deleteProject(req, res) {
   }
 }
 
-module.exports = { createProject, listProjects, getProject, deleteProject };
+// GET /api/projects/:id/pdf — streams a server-generated PDF of the
+// consolidated report, ownership-checked, built entirely from already-
+// persisted data (no live Groq calls).
+async function downloadProjectPdf(req, res) {
+  try {
+    const { id } = req.params;
+    const result = await pool.query(
+      `SELECT id, project_name, industry, business_model, target_market, currency, budget,
+              description, created_at, market_analysis, risk_analysis, recommendations
+       FROM projects WHERE id = $1 AND user_id = $2`,
+      [id, req.userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Project not found.' });
+    }
+
+    const project = result.rows[0];
+    const safeName = (project.project_name || 'veridex-report').replace(/[^a-z0-9]/gi, '_');
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${safeName}_veridex_report.pdf"`);
+
+    generateProjectPdf(project, res);
+  } catch (err) {
+    console.error('Error in downloadProjectPdf:', err.message);
+    res.status(500).json({ success: false, message: 'Something went wrong generating the PDF.' });
+  }
+}
+
+module.exports = { createProject, listProjects, getProject, deleteProject, downloadProjectPdf };

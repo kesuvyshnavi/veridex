@@ -1,0 +1,171 @@
+<!-- server/backend/public/report.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light only">
+  <title>Veridex — Assessment Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="icon" href="/favicon.ico?v=2" sizes="any">
+  <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2">
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/app-status.css" />
+  <link rel="stylesheet" href="/css/results.css" />
+  <link rel="stylesheet" href="/css/risk.css" />
+  <link rel="stylesheet" href="/css/recommendation.css" />
+</head>
+<body data-page="report" data-require-auth="true">
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-left">
+        <svg class="brand-mark" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="vrxGradNav" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#6D5CFF"/><stop offset="0.5" stop-color="#4F46E5"/><stop offset="1" stop-color="#3730A3"/>
+            </linearGradient>
+            <radialGradient id="vrxSheenNav" cx="13" cy="9" r="11" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#FFFFFF" stop-opacity="0.45"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <rect width="40" height="40" rx="11" fill="url(#vrxGradNav)"/>
+          <rect width="40" height="40" rx="11" fill="url(#vrxSheenNav)"/>
+          <path d="M11.5 20.5L17 26L29 12.5" fill="none" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="brand-text">
+          <span class="navbar-brand">Veridex</span>
+          <span class="navbar-tagline">Failure Prediction AI</span>
+        </div>
+      </div>
+      <div class="navbar-links">
+        <a href="dashboard.html" class="nav-item">Dashboard</a>
+      </div>
+      <div class="navbar-right">
+        <div class="profile-avatar" title="Guest User">V</div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="vrx-shell">
+
+    <div id="loadingState" class="dsh-loading">
+      <div class="spinner"></div>
+      <p>Loading report…</p>
+    </div>
+
+    <div id="errorState" class="vrx-empty hidden">
+      <p id="errorText">This report could not be found.</p>
+      <a href="dashboard.html" class="vrx-btn-primary">Back to Dashboard</a>
+    </div>
+
+    <div id="reportRoot" class="hidden">
+
+      <header class="vrx-meta-header">
+        <div class="vrx-meta-main">
+          <p class="vrx-eyebrow">Comprehensive Assessment Report</p>
+          <h1 id="projectName" class="vrx-report-title">—</h1>
+          <div id="tagRow" class="vrx-tag-row"></div>
+        </div>
+        <div class="vrx-meta-actions">
+            <button type="button" id="sharePdfBtn" class="vrx-btn-secondary">Share</button>
+<a id="downloadPdfBtn" href="#" class="vrx-btn-primary"> Download PDF</a>
+          
+          <a href="dashboard.html" class="vrx-btn-secondary">← Dashboard</a>
+        </div>
+      </header>
+
+      <!-- Section 01: Market Intelligence -->
+      <section class="vrx-capability">
+        <div class="vrx-capability-head">
+          <span class="vrx-cap-num">01</span>
+          <div><h2>Market &amp; Competitor Intelligence</h2></div>
+        </div>
+        <div id="marketSectionEmpty" class="vrx-notice hidden"><p>Not generated for this project.</p></div>
+        <div id="marketSectionBody">
+          <p id="marketOverview" class="vrx-overview">—</p>
+          <div class="vrx-metrics-grid" id="metricsGrid"></div>
+          <div class="vrx-two-col">
+            <div class="vrx-panel">
+              <h3 class="vrx-panel-title">Key Competitors</h3>
+              <div id="competitorGrid" class="vrx-competitor-grid" style="margin-top:12px;"></div>
+            </div>
+            <div class="vrx-panel">
+              <h3 class="vrx-panel-title">Growth Potential</h3>
+              <div class="vrx-growth-score-row">
+                <div class="vrx-growth-score-circle" id="growthScoreCircle">
+                  <span id="growthScoreValue">0</span><span class="vrx-growth-score-max">/ 100</span>
+                </div>
+                <p id="growthSummary" class="vrx-growth-summary">—</p>
+              </div>
+            </div>
+          </div>
+          <div class="vrx-panel vrx-panel-warn" style="margin-top:16px;">
+            <h3 class="vrx-panel-title">Industry Challenges</h3>
+            <ul id="challengesList" class="vrx-icon-list vrx-icon-list-warn"></ul>
+          </div>
+          <div class="vrx-panel vrx-panel-good" style="margin-top:16px;">
+            <h3 class="vrx-panel-title">Opportunities</h3>
+            <ul id="opportunitiesList" class="vrx-icon-list vrx-icon-list-good"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 02: Risk Assessment -->
+      <section class="rsk-section">
+        <div class="rsk-section-head">
+          <span class="vrx-cap-num">02</span>
+          <div><h2>Risk Assessment &amp; SWOT</h2></div>
+        </div>
+        <div id="riskSectionEmpty" class="vrx-notice hidden"><p>Not generated for this project.</p></div>
+        <div id="riskSectionBody">
+          <div class="rsk-panel">
+            <div class="rsk-gauge-label-row">
+              <span id="riskLevelBadge" class="rsk-level-badge rsk-level-low">—</span>
+              <span id="riskScoreText" style="font-family:var(--vrx-font-mono);font-size:0.9rem;"></span>
+            </div>
+            <div id="categoryGrid" class="rsk-category-grid"></div>
+          </div>
+          <div class="rsk-swot-grid" style="margin-top:16px;">
+            <div class="rsk-swot-card rsk-swot-strengths"><div class="rsk-swot-head"><span class="rsk-swot-icon">S</span><h3>Strengths</h3></div><ul id="strengthsList"></ul></div>
+            <div class="rsk-swot-card rsk-swot-weaknesses"><div class="rsk-swot-head"><span class="rsk-swot-icon">W</span><h3>Weaknesses</h3></div><ul id="weaknessesList"></ul></div>
+            <div class="rsk-swot-card rsk-swot-opportunities"><div class="rsk-swot-head"><span class="rsk-swot-icon">O</span><h3>Opportunities</h3></div><ul id="swotOpportunitiesList"></ul></div>
+            <div class="rsk-swot-card rsk-swot-threats"><div class="rsk-swot-head"><span class="rsk-swot-icon">T</span><h3>Threats</h3></div><ul id="threatsList"></ul></div>
+          </div>
+          <div class="rsk-panel rsk-panel-accent" style="margin-top:16px;">
+            <span id="verdictBadge" class="rsk-verdict-badge">—</span>
+            <p id="feasibilitySummary" style="margin-top:8px;">—</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 03: Recommendations -->
+      <section class="rsk-section">
+        <div class="rsk-section-head">
+          <span class="vrx-cap-num">03</span>
+          <div><h2>Strategic Recommendations &amp; Risk Mitigation</h2></div>
+        </div>
+        <div id="recSectionEmpty" class="vrx-notice hidden"><p>Not generated for this project.</p></div>
+        <div id="recSectionBody" class="rec-columns">
+          <div class="rec-panel">
+            <div class="rec-panel-head"><span class="rec-panel-icon rec-icon-ai">✦</span><h3>Recommendations</h3></div>
+            <div id="recommendationsPanel" class="rec-panel-body"></div>
+          </div>
+          <div class="rec-panel">
+            <div class="rec-panel-head"><span class="rec-panel-icon rec-icon-mitigation">⚠</span><h3>Risk Mitigation</h3></div>
+            <div id="mitigationPanel" class="rec-panel-body"></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="/js/auth-common.js"></script>
+  <script src="/js/report.js"></script>
+  <script src="/js/back-to-top.js"></script>
+</body>
+</html>

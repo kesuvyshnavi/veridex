@@ -129,6 +129,8 @@ function renderCard(p) {
         ${renderSummaryContent(p)}
       </div>
 
+            <a href="report.html?id=${p.id}" class="vrx-btn-primary" style="text-align:center;justify-content:center;">View Full Report</a>
+
       <div class="dsh-card-actions" data-actions>
         <button type="button" class="dsh-btn" data-toggle-summary>View Summary</button>
         <button type="button" class="dsh-btn dsh-btn-danger" data-delete-trigger>Delete</button>
