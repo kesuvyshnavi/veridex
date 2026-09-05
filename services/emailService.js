@@ -1,46 +1,65 @@
 // server/backend/services/emailService.js
-// Minimal email sender for password-reset and email-verification links.
-// Uses nodemailer with SMTP credentials from environment variables. If no
-// SMTP credentials are configured, emails are logged to the console
-// instead of silently failing — the feature still works end to end for
-// testing, it just doesn't send a real email until SMTP is set up.
+// Sends password-reset and email-verification links via Brevo's
+// transactional email HTTP API (https://api.brevo.com) instead of raw
+// SMTP. Render's free tier blocks outbound traffic on SMTP ports
+// (25/465/587), which is why nodemailer worked locally but hung/failed
+// in production. HTTPS (port 443) isn't blocked, so an HTTP-based email
+// API sidesteps the restriction entirely. Uses axios, which is already a
+// project dependency — no new package needed.
 
-const nodemailer = require('nodemailer');
+const axios = require('axios');
 require('dotenv').config();
 
+const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
+
 function isEmailConfigured() {
-  return !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+  return !!(process.env.BREVO_API_KEY && process.env.SMTP_FROM);
 }
 
-let transporter = null;
-function getTransporter() {
-  if (!isEmailConfigured()) return null;
-  if (!transporter) {
-    transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT || 587),
-      secure: Number(process.env.SMTP_PORT) === 465,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+// Parses "Veridex <no-reply@veridex.app>" into { name, email }; falls back
+// to a bare address if no display name is present.
+function parseFromAddress(raw) {
+  const match = String(raw || '').match(/^(.*)<(.+)>$/);
+  if (match) {
+    return { name: match[1].trim() || 'Veridex', email: match[2].trim() };
   }
-  return transporter;
+  return { name: 'Veridex', email: raw };
 }
 
 async function sendEmail({ to, subject, html, text }) {
-  const from = process.env.SMTP_FROM || 'Veridex <no-reply@veridex.app>';
-  const t = getTransporter();
-
-  if (!t) {
-    console.log('📧 [emailService] SMTP not configured — logging email instead of sending:');
+  if (!isEmailConfigured()) {
+    console.log('📧 [emailService] Brevo not configured — logging email instead of sending:');
     console.log(`To: ${to}\nSubject: ${subject}\n${text || html}`);
     return { sent: false, logged: true };
   }
 
-  await t.sendMail({ from, to, subject, html, text });
-  return { sent: true, logged: false };
+  const sender = parseFromAddress(process.env.SMTP_FROM);
+
+  try {
+    await axios.post(
+      BREVO_API_URL,
+      {
+        sender,
+        to: [{ email: to }],
+        subject,
+        htmlContent: html,
+        textContent: text,
+      },
+      {
+        headers: {
+          'api-key': process.env.BREVO_API_KEY,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        timeout: 10000,
+      }
+    );
+    return { sent: true, logged: false };
+  } catch (err) {
+    const details = err.response?.data || err.message;
+    console.error('Brevo send failed:', details);
+    throw new Error('Failed to send email');
+  }
 }
 
 function sendPasswordResetEmail(to, resetUrl) {
