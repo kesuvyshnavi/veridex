@@ -4,6 +4,14 @@
 // pages, wires password show/hide, and (mobile only) injects a hamburger
 // button that turns .navbar-links into a dropdown menu. Desktop layout is
 // untouched — the hamburger only renders below the 960px breakpoint via CSS.
+//
+// The hamburger button is placed INSIDE .navbar-right, immediately before
+// whatever's rendered there (avatar or login/signup), rather than as a
+// sibling of .navbar-right. With only 3 top-level flex children and
+// justify-content: space-between, a sibling hamburger got shoved into the
+// middle of the navbar instead of hugging the profile controls. Because
+// renderLoggedIn/renderLoggedOut replace .navbar-right's innerHTML, the
+// hamburger is re-inserted as the first child every time those run.
 
 (function () {
   async function fetchCurrentUser() {
@@ -112,20 +120,9 @@
     });
   }
 
-  // Injects a hamburger button into .navbar-inner (as a sibling of
-  // .navbar-right, so it survives .navbar-right's innerHTML being
-  // replaced by renderLoggedIn/renderLoggedOut) and wires it to toggle
-  // .navbar-links into a mobile dropdown. Only does anything on pages
-  // that actually have a .navbar-links element (index, results, risk,
-  // recommendations, dashboard, report) — home/login/register are
-  // untouched. Purely additive on desktop: the button itself is
-  // display:none above 960px via CSS, so desktop layout never changes.
-  function initNavbarHamburger() {
-    const inner = document.querySelector('.navbar-inner');
-    const links = document.querySelector('.navbar-links');
-    if (!inner || !links) return;
-    if (document.getElementById('navbarHamburgerBtn')) return;
-
+  // Builds the hamburger button once. Wiring (open/close + outside-click)
+  // is attached here too, so it survives being moved around the DOM.
+  function createHamburgerButton(links) {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.id = 'navbarHamburgerBtn';
@@ -134,9 +131,6 @@
     btn.setAttribute('aria-expanded', 'false');
     btn.innerHTML = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>`;
 
-    const right = document.querySelector('.navbar-right');
-    inner.insertBefore(btn, right || null);
-
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const isOpen = links.classList.toggle('is-open');
@@ -144,16 +138,39 @@
     });
 
     document.addEventListener('click', (e) => {
-      if (links.classList.contains('is-open') && !links.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+      if (links.classList.contains('is-open') && !links.contains(e.target) && !btn.contains(e.target)) {
         links.classList.remove('is-open');
         btn.setAttribute('aria-expanded', 'false');
       }
     });
+
+    return btn;
+  }
+
+  // Places the hamburger as the FIRST child inside .navbar-right, directly
+  // before the avatar / login-signup controls — not as a sibling of
+  // .navbar-right, which used to leave it stranded mid-navbar due to
+  // justify-content: space-between on .navbar-inner. Only does anything on
+  // pages that actually have a .navbar-links element (index, results,
+  // risk, recommendations, dashboard, report) — home/login/register are
+  // untouched. Purely additive on desktop: the button is display:none
+  // above 960px via CSS, so desktop layout never changes.
+  function placeNavbarHamburger(navbarRight) {
+    const links = document.querySelector('.navbar-links');
+    if (!links || !navbarRight) return;
+
+    let btn = document.getElementById('navbarHamburgerBtn');
+    if (!btn) {
+      btn = createHamburgerButton(links);
+    } else {
+      btn.remove(); // detach from wherever it was before the re-render
+    }
+
+    navbarRight.insertBefore(btn, navbarRight.firstChild);
   }
 
   async function init() {
     initPasswordToggles();
-    initNavbarHamburger();
 
     const navbarRight = document.querySelector('.navbar-right');
     const user = await fetchCurrentUser();
@@ -164,6 +181,7 @@
       } else {
         renderLoggedOut(navbarRight);
       }
+      placeNavbarHamburger(navbarRight);
     }
 
     if (document.body.getAttribute('data-require-auth') === 'true' && !user) {
