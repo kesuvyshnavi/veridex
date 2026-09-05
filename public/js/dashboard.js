@@ -1,13 +1,10 @@
 // server/backend/public/js/dashboard.js
-// Lists the logged-in user's own projects (GET /api/projects), shows a
-// quick-glance status per engine (Market/Risk/Recommendations), supports
-// deleting a project with an inline two-step confirmation, and lets the
-// user CONTINUE an incomplete project (one that stopped before Risk
-// Assessment or Recommendations) rather than only viewing a read-only
-// report. Continuing fetches the full project record (GET /api/projects/:id
-// — the list endpoint omits "description" to keep payloads small), seeds
-// sessionStorage exactly the way main.js/risk.js do after a live
-// submission, and redirects straight to the next unfinished step.
+// Lists the logged-in user's own projects (paginated via GET
+// /api/projects?page=&limit=), shows a quick-glance status per engine,
+// supports deleting a project, and lets the user CONTINUE an incomplete
+// project — including RETRYING Market Intelligence itself if that step
+// never completed at all (the stuck-project edge case), or continuing
+// straight to Risk Assessment / Recommendations.
 
 function escapeHtml(str) {
   const div = document.createElement('div');
@@ -21,6 +18,8 @@ function formatDate(isoString) {
   return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
+const PAGE_SIZE = 20;
+
 const loadingState = document.getElementById('loadingState');
 const emptyState = document.getElementById('emptyState');
 const errorState = document.getElementById('errorState');
@@ -28,15 +27,38 @@ const errorText = document.getElementById('errorText');
 const retryBtn = document.getElementById('retryBtn');
 const projectGrid = document.getElementById('projectGrid');
 
+let allProjects = [];
+let currentPage = 1;
+let hasMore = false;
+let loadMoreBtn = null;
+
 function showOnly(el) {
   [loadingState, emptyState, errorState, projectGrid].forEach((node) => node.classList.add('hidden'));
   el.classList.remove('hidden');
 }
 
-async function loadProjects() {
-  showOnly(loadingState);
+function ensureLoadMoreButton() {
+  if (loadMoreBtn) return loadMoreBtn;
+  loadMoreBtn = document.createElement('button');
+  loadMoreBtn.type = 'button';
+  loadMoreBtn.className = 'vrx-btn-secondary';
+  loadMoreBtn.style.cssText = 'display:block;margin:20px auto 0;';
+  loadMoreBtn.textContent = 'Load more projects';
+  loadMoreBtn.addEventListener('click', () => loadProjects({ page: currentPage + 1, append: true }));
+  projectGrid.insertAdjacentElement('afterend', loadMoreBtn);
+  return loadMoreBtn;
+}
+
+async function loadProjects({ page = 1, append = false } = {}) {
+  if (!append) {
+    showOnly(loadingState);
+  } else {
+    loadMoreBtn.disabled = true;
+    loadMoreBtn.textContent = 'Loading…';
+  }
+
   try {
-    const res = await fetch('/api/projects', { credentials: 'same-origin' });
+    const res = await fetch(`/api/projects?page=${page}&limit=${PAGE_SIZE}`, { credentials: 'same-origin' });
     const result = await res.json();
 
     if (!res.ok || !result.success) {
@@ -45,13 +67,22 @@ async function loadProjects() {
       return;
     }
 
-    if (!result.projects.length) {
+    currentPage = page;
+    hasMore = !!(result.pagination && result.pagination.hasMore);
+    allProjects = append ? allProjects.concat(result.projects) : result.projects;
+
+    if (!allProjects.length) {
       showOnly(emptyState);
       return;
     }
 
-    renderGrid(result.projects);
+    renderGrid(allProjects);
     showOnly(projectGrid);
+
+    const btn = ensureLoadMoreButton();
+    btn.classList.toggle('hidden', !hasMore);
+    btn.disabled = false;
+    btn.textContent = 'Load more projects';
   } catch (err) {
     console.error('Failed to load projects:', err);
     errorText.textContent = 'Unable to reach the server. Please check your connection.';
@@ -59,7 +90,7 @@ async function loadProjects() {
   }
 }
 
-retryBtn.addEventListener('click', loadProjects);
+retryBtn.addEventListener('click', () => loadProjects({ page: 1 }));
 
 function scoreClass(score) {
   if (typeof score !== 'number') return '';
@@ -69,7 +100,6 @@ function scoreClass(score) {
 }
 
 function riskScoreClass(score) {
-  // Risk score is inverted: LOWER is better.
   if (typeof score !== 'number') return '';
   if (score <= 35) return 'score-good';
   if (score <= 60) return 'score-mid';
@@ -80,13 +110,23 @@ function badge(label, isDone) {
   return `<span class="dsh-badge ${isDone ? 'dsh-badge-done' : 'dsh-badge-pending'}">${isDone ? '✓' : '—'} ${label}</span>`;
 }
 
-// Figures out the single next unfinished step for a project, or null if
-// the project is fully complete (or stuck at Market with no clean
-// continue path — see file header note).
+// Figures out the single next action for a project:
+// - Market Intelligence missing entirely -> retry Market Intelligence
+//   (the stuck-project edge case: happens if the fallback generator
+//   itself somehow also failed).
+// - Risk Assessment missing -> continue to Risk Assessment.
+// - Recommendations missing -> continue to Recommendations.
+// - All three present -> no action needed.
 function nextStepInfo(p) {
-  if (!p.market_analysis) return null;
-  if (!p.risk_analysis) return { targetPage: 'risk.html', label: 'Continue: Risk Assessment' };
-  if (!p.recommendations) return { targetPage: 'recommendations.html', label: 'Continue: Recommendations' };
+  if (!p.market_analysis) {
+    return { kind: 'retry-market', label: 'Retry Market Analysis' };
+  }
+  if (!p.risk_analysis) {
+    return { kind: 'navigate', targetPage: 'risk.html', label: 'Continue: Risk Assessment' };
+  }
+  if (!p.recommendations) {
+    return { kind: 'navigate', targetPage: 'recommendations.html', label: 'Continue: Recommendations' };
+  }
   return null;
 }
 
@@ -147,7 +187,7 @@ function renderCard(p) {
 
       ${
         nextStep
-          ? `<button type="button" class="dsh-btn dsh-btn-continue" data-continue-trigger>${escapeHtml(nextStep.label)} →</button>`
+          ? `<button type="button" class="dsh-btn-continue" data-continue-trigger>${escapeHtml(nextStep.label)} →</button>`
           : ''
       }
 
@@ -188,15 +228,43 @@ function renderSummaryContent(p) {
   return parts.join('');
 }
 
-// Loads the full project record (with "description", which the list
-// endpoint omits), seeds sessionStorage in the exact shape risk.js /
-// recommendation.js expect, and redirects to the correct next step.
-async function continueProject(projectId, targetPage) {
-  const card = document.querySelector(`.dsh-card[data-project-id="${projectId}"]`);
-  const continueBtn = card ? card.querySelector('[data-continue-trigger]') : null;
-  if (continueBtn) {
-    continueBtn.disabled = true;
-    continueBtn.textContent = 'Loading…';
+async function retryMarketAnalysis(projectId, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Retrying…';
+  try {
+    const res = await fetch(`/api/projects/${projectId}/retry-market-analysis`, {
+      method: 'POST',
+      credentials: 'same-origin',
+    });
+    const result = await res.json();
+
+    if (!res.ok || !result.success) {
+      alert(result.message || 'Could not retry market analysis.');
+      btn.disabled = false;
+      btn.textContent = 'Retry Market Analysis →';
+      return;
+    }
+
+    if (!result.analysis) {
+      alert(result.analysisError || 'Market analysis is still unavailable. Please try again shortly.');
+      btn.disabled = false;
+      btn.textContent = 'Retry Market Analysis →';
+      return;
+    }
+
+    await loadProjects({ page: 1 });
+  } catch (err) {
+    console.error('Failed to retry market analysis:', err);
+    alert('Unable to reach the server. Please try again.');
+    btn.disabled = false;
+    btn.textContent = 'Retry Market Analysis →';
+  }
+}
+
+async function continueProject(projectId, targetPage, btn) {
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Loading…';
   }
 
   try {
@@ -230,8 +298,6 @@ async function continueProject(projectId, targetPage) {
       })
     );
 
-    // Only carry forward a risk cache if risk assessment is actually done —
-    // recommendation.js treats its presence as "Risk Assessment was run".
     if (full.risk_analysis) {
       sessionStorage.setItem(
         'veridexRiskResult',
@@ -245,9 +311,9 @@ async function continueProject(projectId, targetPage) {
   } catch (err) {
     console.error('Failed to continue project:', err);
     alert('Unable to reach the server. Please try again.');
-    if (continueBtn) {
-      continueBtn.disabled = false;
-      continueBtn.textContent = 'Continue →';
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Continue →';
     }
   }
 }
@@ -269,8 +335,12 @@ function attachCardHandlers(projects) {
       const projectId = card.getAttribute('data-project-id');
       const project = projects.find((p) => String(p.id) === String(projectId));
       const nextStep = project ? nextStepInfo(project) : null;
-      if (nextStep) {
-        continueProject(projectId, nextStep.targetPage);
+      if (!nextStep) return;
+
+      if (nextStep.kind === 'retry-market') {
+        retryMarketAnalysis(projectId, btn);
+      } else {
+        continueProject(projectId, nextStep.targetPage, btn);
       }
     });
   });
@@ -281,8 +351,6 @@ function attachCardHandlers(projects) {
       const actions = card.querySelector('[data-actions]');
       const projectId = card.getAttribute('data-project-id');
 
-      // Step 1 -> Step 2: swap the action row for an inline confirmation,
-      // same no-popup pattern as the profile menu's logout confirm.
       actions.innerHTML = `
         <div class="dsh-confirm-row">
           <span class="dsh-confirm-text">Delete this project?</span>
@@ -302,8 +370,6 @@ function attachCardHandlers(projects) {
           const result = await res.json();
 
           if (!res.ok || !result.success) {
-            // A 404 here almost always means this project belongs to a
-            // different logged-in account than the one currently active.
             console.error('Delete failed:', result.message);
             alert(result.message || 'Could not delete this project. It may belong to a different account.');
             if (yesBtn) yesBtn.disabled = false;
@@ -311,10 +377,7 @@ function attachCardHandlers(projects) {
           }
 
           console.log(`Deleted project ${result.deletedId} from the database.`);
-
-          // Re-fetch from the server instead of trusting local removal —
-          // this always shows the DB's real state.
-          await loadProjects();
+          await loadProjects({ page: 1 });
         } catch (err) {
           console.error('Delete failed:', err);
           alert('Unable to reach the server. Please try again.');
@@ -333,4 +396,4 @@ function attachCardHandlers(projects) {
   });
 }
 
-loadProjects();
+loadProjects({ page: 1 });

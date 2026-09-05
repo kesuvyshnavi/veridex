@@ -99,28 +99,47 @@ async function createProject(req, res) {
 }
 
 // GET /api/projects — list only the logged-in user's own projects, newest
-// first. Returns the persisted analyses too, so the dashboard can show
-// quick-glance scores without re-calling any AI engine.
+// first. Supports pagination via ?page=&limit= (defaults: page 1, limit
+// 20, max 50) so an account with many projects doesn't pull its entire
+// history into one response every time the dashboard loads.
 async function listProjects(req, res) {
   try {
-    const result = await pool.query(
-      `SELECT id, project_name, industry, business_model, target_market, currency, budget,
-              created_at, market_analysis, risk_analysis, recommendations
-       FROM projects
-       WHERE user_id = $1
-       ORDER BY created_at DESC`,
-      [req.userId]
-    );
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 20));
+    const offset = (page - 1) * limit;
 
-    return res.status(200).json({ success: true, projects: result.rows });
+    const [rowsResult, countResult] = await Promise.all([
+      pool.query(
+        `SELECT id, project_name, industry, business_model, target_market, currency, budget,
+                created_at, market_analysis, risk_analysis, recommendations
+         FROM projects
+         WHERE user_id = $1
+         ORDER BY created_at DESC
+         LIMIT $2 OFFSET $3`,
+        [req.userId, limit, offset]
+      ),
+      pool.query('SELECT COUNT(*)::int AS total FROM projects WHERE user_id = $1', [req.userId]),
+    ]);
+
+    const total = countResult.rows[0].total;
+
+    return res.status(200).json({
+      success: true,
+      projects: rowsResult.rows,
+      pagination: {
+        page,
+        limit,
+        total,
+        hasMore: offset + rowsResult.rows.length < total,
+      },
+    });
   } catch (err) {
     console.error('Error in listProjects:', err.message);
     return res.status(500).json({ success: false, message: 'Something went wrong while loading your projects.' });
   }
 }
 
-// GET /api/projects/:id — a single project, ownership-checked. Used by the
-// consolidated report view.
+// GET /api/projects/:id — a single project, ownership-checked.
 async function getProject(req, res) {
   try {
     const { id } = req.params;
@@ -144,8 +163,52 @@ async function getProject(req, res) {
   }
 }
 
-// DELETE /api/projects/:id — ownership-checked; only deletes if the row
-// actually belongs to the logged-in user.
+// POST /api/projects/:id/retry-market-analysis — data/edge-case fix: if
+// the initial Groq call AND its deterministic fallback both somehow left
+// market_analysis empty, the project was previously stuck with no way to
+// complete it. This re-runs Market Intelligence for an existing, owned
+// project using its already-stored fields, without requiring resubmission.
+async function retryMarketAnalysis(req, res) {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(
+      `SELECT id, project_name, industry, business_model, target_market, currency, budget, description
+       FROM projects WHERE id = $1 AND user_id = $2`,
+      [id, req.userId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Project not found.' });
+    }
+
+    const project = result.rows[0];
+
+    let analysis;
+    try {
+      analysis = await getMarketAnalysis(project);
+    } catch (aiError) {
+      console.error('Retry market analysis failed:', aiError.message);
+      return res.status(200).json({
+        success: true,
+        analysis: null,
+        analysisError: 'Market analysis could not be generated. Please try again later.',
+      });
+    }
+
+    await pool.query('UPDATE projects SET market_analysis = $1 WHERE id = $2 AND user_id = $3', [
+      JSON.stringify(analysis),
+      id,
+      req.userId,
+    ]);
+
+    return res.status(200).json({ success: true, analysis });
+  } catch (err) {
+    console.error('Error in retryMarketAnalysis:', err.message);
+    return res.status(500).json({ success: false, message: 'Something went wrong while retrying the analysis.' });
+  }
+}
+
+// DELETE /api/projects/:id — ownership-checked.
 async function deleteProject(req, res) {
   try {
     const { id } = req.params;
@@ -166,9 +229,7 @@ async function deleteProject(req, res) {
   }
 }
 
-// GET /api/projects/:id/pdf — streams a server-generated PDF of the
-// consolidated report, ownership-checked, built entirely from already-
-// persisted data (no live Groq calls).
+// GET /api/projects/:id/pdf
 async function downloadProjectPdf(req, res) {
   try {
     const { id } = req.params;
@@ -196,4 +257,11 @@ async function downloadProjectPdf(req, res) {
   }
 }
 
-module.exports = { createProject, listProjects, getProject, deleteProject, downloadProjectPdf };
+module.exports = {
+  createProject,
+  listProjects,
+  getProject,
+  deleteProject,
+  downloadProjectPdf,
+  retryMarketAnalysis,
+};

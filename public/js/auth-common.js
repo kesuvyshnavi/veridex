@@ -1,18 +1,14 @@
 // server/backend/public/js/auth-common.js
-// Loaded on every page. Checks login state via GET /api/auth/me and
-// updates the navbar's .navbar-right accordingly, gates auth-required
-// pages, wires password show/hide, and (mobile only) injects a hamburger
-// button that turns .navbar-links into a dropdown menu. Desktop layout is
-// untouched — the hamburger only renders below the 960px breakpoint via CSS.
-//
-// Performance note: the /api/auth/me check is cached in sessionStorage for
-// a short window so navigating across the 4-step analysis flow (Input ->
-// Market -> Risk -> Recommendations) doesn't refetch the same auth check
-// on every single page load.
+// Loaded on every page. Checks login state via GET /api/auth/me (cached
+// briefly to avoid refetching on every page nav), updates the navbar's
+// .navbar-right accordingly, gates auth-required pages, wires password
+// show/hide, injects a mobile hamburger next to the profile controls, and
+// shows a dismissible "please verify your email" banner for unverified
+// accounts.
 
 (function () {
   const AUTH_CACHE_KEY = 'veridexAuthCache';
-  const AUTH_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+  const AUTH_CACHE_TTL_MS = 5 * 60 * 1000;
 
   function getCachedUser() {
     try {
@@ -20,7 +16,7 @@
       if (!raw) return undefined;
       const { user, ts } = JSON.parse(raw);
       if (Date.now() - ts > AUTH_CACHE_TTL_MS) return undefined;
-      return user; // may be null (cached "logged out") or a user object
+      return user;
     } catch (err) {
       return undefined;
     }
@@ -30,7 +26,7 @@
     try {
       sessionStorage.setItem(AUTH_CACHE_KEY, JSON.stringify({ user, ts: Date.now() }));
     } catch (err) {
-      // sessionStorage unavailable (rare) — just skip caching, no functional impact
+      // ignore
     }
   }
 
@@ -49,7 +45,7 @@
       setCachedUser(user);
       return user;
     } catch (err) {
-      return null; // network failure: don't cache, so the next page retries fresh
+      return null;
     }
   }
 
@@ -149,8 +145,6 @@
     });
   }
 
-  // Builds the hamburger button once. Wiring (open/close + outside-click)
-  // is attached here too, so it survives being moved around the DOM.
   function createHamburgerButton(links) {
     const btn = document.createElement('button');
     btn.type = 'button';
@@ -176,14 +170,6 @@
     return btn;
   }
 
-  // Places the hamburger as the FIRST child inside .navbar-right, directly
-  // before the avatar / login-signup controls — not as a sibling of
-  // .navbar-right, which used to leave it stranded mid-navbar due to
-  // justify-content: space-between on .navbar-inner. Only does anything on
-  // pages that actually have a .navbar-links element (index, results,
-  // risk, recommendations, dashboard, report) — home/login/register are
-  // untouched. Purely additive on desktop: the button is display:none
-  // above 960px via CSS, so desktop layout never changes.
   function placeNavbarHamburger(navbarRight) {
     const links = document.querySelector('.navbar-links');
     if (!links || !navbarRight) return;
@@ -192,10 +178,58 @@
     if (!btn) {
       btn = createHamburgerButton(links);
     } else {
-      btn.remove(); // detach from wherever it was before the re-render
+      btn.remove();
     }
 
     navbarRight.insertBefore(btn, navbarRight.firstChild);
+  }
+
+  function escapeForBanner(str) {
+    const div = document.createElement('div');
+    div.textContent = str == null ? '' : String(str);
+    return div.innerHTML;
+  }
+
+  // Shows a dismissible banner for unverified accounts, with a one-click
+  // resend action. Dismissal is remembered for the current tab session so
+  // it doesn't nag on every single page.
+  function maybeShowVerifyBanner(user) {
+    if (!user || user.emailVerified) return;
+    if (document.getElementById('vrxVerifyBanner')) return;
+    if (sessionStorage.getItem('veridexVerifyBannerDismissed') === '1') return;
+
+    const banner = document.createElement('div');
+    banner.id = 'vrxVerifyBanner';
+    banner.className = 'vrx-verify-banner';
+    banner.innerHTML = `
+      <span>Please verify your email address (${escapeForBanner(user.email)}).</span>
+      <button type="button" id="vrxResendVerifyBtn">Resend verification email</button>
+      <button type="button" id="vrxDismissVerifyBtn" aria-label="Dismiss">×</button>
+    `;
+    document.body.insertBefore(banner, document.body.firstChild);
+
+    document.getElementById('vrxResendVerifyBtn').addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+      try {
+        const res = await fetch('/api/auth/resend-verification', { method: 'POST', credentials: 'same-origin' });
+        const result = await res.json();
+        btn.textContent = result.success ? 'Sent!' : 'Try again';
+      } catch (err) {
+        btn.textContent = 'Try again';
+      } finally {
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.textContent = 'Resend verification email';
+        }, 4000);
+      }
+    });
+
+    document.getElementById('vrxDismissVerifyBtn').addEventListener('click', () => {
+      banner.remove();
+      sessionStorage.setItem('veridexVerifyBannerDismissed', '1');
+    });
   }
 
   async function init() {
@@ -212,6 +246,8 @@
       }
       placeNavbarHamburger(navbarRight);
     }
+
+    maybeShowVerifyBanner(user);
 
     if (document.body.getAttribute('data-require-auth') === 'true' && !user) {
       window.location.href = 'login.html';

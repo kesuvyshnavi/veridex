@@ -13,22 +13,25 @@ const pool = new Pool({
   ssl: {
     rejectUnauthorized: false,
   },
-  // Pool tuning: caps concurrent connections against Supabase's limit,
-  // recycles idle connections instead of holding them open indefinitely,
-  // and fails fast on a dead/unreachable DB instead of hanging the request.
   max: 10,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000,
 });
 
-// Quick sanity check when the server starts
-pool.connect((err, client, release) => {
-  if (err) {
-    console.error('❌ Failed to connect to PostgreSQL:', err.message);
-    return;
-  }
-  console.log('✅ Connected to PostgreSQL database');
-  release();
-});
+// Quick sanity check when the server starts — skipped during automated
+// tests (Jest sets NODE_ENV=test automatically). Test suites shouldn't
+// depend on a live network connection to Supabase to run quickly and
+// deterministically; routes/controllers that actually need the DB are
+// exercised with their own test setup as the suite grows.
+if (process.env.NODE_ENV !== 'test') {
+  pool.connect((err, client, release) => {
+    if (err) {
+      console.error('❌ Failed to connect to PostgreSQL:', err.message);
+      return;
+    }
+    console.log('✅ Connected to PostgreSQL database');
+    release();
+  });
+}
 
 module.exports = pool;

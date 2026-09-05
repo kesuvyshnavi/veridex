@@ -1,10 +1,12 @@
 // server/backend/services/authService.js
-// Password hashing + JWT issuing/verification for Milestone 4 auth.
-// Stateless JWT-in-httpOnly-cookie approach: no session store needed, so
-// auth survives Render's free-tier restarts without extra infrastructure.
+// Password hashing + JWT issuing/verification, plus helpers for
+// generating and hashing single-use tokens used by password reset and
+// email verification (hashed at rest — a DB leak alone doesn't hand out
+// a working reset/verify link).
 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 require('dotenv').config();
 
 const SALT_ROUNDS = 10;
@@ -26,4 +28,19 @@ function verifyToken(token) {
   return jwt.verify(token, process.env.JWT_SECRET); // throws if invalid/expired
 }
 
-module.exports = { hashPassword, comparePassword, signToken, verifyToken };
+function generateRawToken() {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+function hashToken(rawToken) {
+  return crypto.createHash('sha256').update(rawToken).digest('hex');
+}
+
+module.exports = {
+  hashPassword,
+  comparePassword,
+  signToken,
+  verifyToken,
+  generateRawToken,
+  hashToken,
+};
