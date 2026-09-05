@@ -15,7 +15,26 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Serve static frontend (HTML, CSS, JS) from the "public" folder.
-app.use(express.static(path.join(__dirname, 'public'), { index: false }));
+//
+// Cache-Control: no-cache forces the browser to revalidate with the server
+// on every load instead of trusting its own disk cache blindly. Without
+// this, browsers apply heuristic caching to CSS/JS/HTML that have no
+// explicit cache header, which was causing stale (old) versions of the
+// UI to render first, then get swapped for the current version a moment
+// later once a background revalidation happened. Express still sends an
+// ETag automatically, so an unchanged file gets a fast 304 response
+// instead of being re-downloaded — this fixes the flash without making
+// pages noticeably slower.
+app.use(
+  express.static(path.join(__dirname, 'public'), {
+    index: false,
+    etag: true,
+    lastModified: true,
+    setHeaders: (res) => {
+      res.setHeader('Cache-Control', 'no-cache');
+    },
+  })
+);
 
 // API routes
 app.use('/api/auth', authRoutes);
@@ -25,6 +44,7 @@ app.use('/api/recommendations', recommendationRoutes);
 
 // Root route: serve home.html as the landing page
 app.get('/', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache');
   res.sendFile(path.join(__dirname, 'public', 'home.html'));
 });
 
