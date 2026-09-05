@@ -12,7 +12,7 @@ const recommendationRoutes = require('./routes/recommendationRoutes');
 const authRoutes = require('./routes/authRoutes');
 
 const app = express();
-
+app.set('trust proxy', 1);
 app.use(compression());
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
