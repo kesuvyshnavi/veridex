@@ -1,8 +1,13 @@
 // server/backend/public/js/dashboard.js
 // Lists the logged-in user's own projects (GET /api/projects), shows a
-// quick-glance status per engine (Market/Risk/Recommendations), and
-// supports deleting a project with an inline two-step confirmation — no
-// browser popups, same pattern as the profile menu's logout confirm.
+// quick-glance status per engine (Market/Risk/Recommendations), supports
+// deleting a project with an inline two-step confirmation, and lets the
+// user CONTINUE an incomplete project (one that stopped before Risk
+// Assessment or Recommendations) rather than only viewing a read-only
+// report. Continuing fetches the full project record (GET /api/projects/:id
+// — the list endpoint omits "description" to keep payloads small), seeds
+// sessionStorage exactly the way main.js/risk.js do after a live
+// submission, and redirects straight to the next unfinished step.
 
 function escapeHtml(str) {
   const div = document.createElement('div');
@@ -75,6 +80,16 @@ function badge(label, isDone) {
   return `<span class="dsh-badge ${isDone ? 'dsh-badge-done' : 'dsh-badge-pending'}">${isDone ? '✓' : '—'} ${label}</span>`;
 }
 
+// Figures out the single next unfinished step for a project, or null if
+// the project is fully complete (or stuck at Market with no clean
+// continue path — see file header note).
+function nextStepInfo(p) {
+  if (!p.market_analysis) return null;
+  if (!p.risk_analysis) return { targetPage: 'risk.html', label: 'Continue: Risk Assessment' };
+  if (!p.recommendations) return { targetPage: 'recommendations.html', label: 'Continue: Recommendations' };
+  return null;
+}
+
 function renderGrid(projects) {
   projectGrid.innerHTML = projects.map((p) => renderCard(p)).join('');
   attachCardHandlers(projects);
@@ -84,6 +99,7 @@ function renderCard(p) {
   const tags = [p.industry, p.business_model, p.target_market, p.budget].filter(Boolean);
   const growthScore = p.market_analysis && p.market_analysis.growthPotential ? p.market_analysis.growthPotential.score : null;
   const riskScore = p.risk_analysis ? p.risk_analysis.overallRiskScore : null;
+  const nextStep = nextStepInfo(p);
 
   return `
     <div class="dsh-card" data-project-id="${p.id}">
@@ -129,7 +145,13 @@ function renderCard(p) {
         ${renderSummaryContent(p)}
       </div>
 
-            <a href="report.html?id=${p.id}" class="vrx-btn-primary" style="text-align:center;justify-content:center;">View Full Report</a>
+      ${
+        nextStep
+          ? `<button type="button" class="dsh-btn dsh-btn-continue" data-continue-trigger>${escapeHtml(nextStep.label)} →</button>`
+          : ''
+      }
+
+      <a href="report.html?id=${p.id}" class="vrx-btn-primary" style="text-align:center;justify-content:center;">View Full Report</a>
 
       <div class="dsh-card-actions" data-actions>
         <button type="button" class="dsh-btn" data-toggle-summary>View Summary</button>
@@ -166,6 +188,70 @@ function renderSummaryContent(p) {
   return parts.join('');
 }
 
+// Loads the full project record (with "description", which the list
+// endpoint omits), seeds sessionStorage in the exact shape risk.js /
+// recommendation.js expect, and redirects to the correct next step.
+async function continueProject(projectId, targetPage) {
+  const card = document.querySelector(`.dsh-card[data-project-id="${projectId}"]`);
+  const continueBtn = card ? card.querySelector('[data-continue-trigger]') : null;
+  if (continueBtn) {
+    continueBtn.disabled = true;
+    continueBtn.textContent = 'Loading…';
+  }
+
+  try {
+    const res = await fetch(`/api/projects/${projectId}`, { credentials: 'same-origin' });
+    const result = await res.json();
+
+    if (!res.ok || !result.success) {
+      alert(result.message || 'Could not load this project to continue.');
+      return;
+    }
+
+    const full = result.project;
+    const projectFields = {
+      project_name: full.project_name,
+      industry: full.industry,
+      business_model: full.business_model,
+      target_market: full.target_market,
+      currency: full.currency,
+      budget: full.budget,
+      description: full.description,
+    };
+
+    sessionStorage.setItem(
+      'veridexResult',
+      JSON.stringify({
+        projectId: full.id,
+        submittedAt: full.created_at,
+        project: projectFields,
+        analysis: full.market_analysis || null,
+        analysisError: full.market_analysis ? null : 'Market analysis is not available for this project.',
+      })
+    );
+
+    // Only carry forward a risk cache if risk assessment is actually done —
+    // recommendation.js treats its presence as "Risk Assessment was run".
+    if (full.risk_analysis) {
+      sessionStorage.setItem(
+        'veridexRiskResult',
+        JSON.stringify({ analysis: full.risk_analysis, generatedAt: new Date().toISOString() })
+      );
+    } else {
+      sessionStorage.removeItem('veridexRiskResult');
+    }
+
+    window.location.href = targetPage;
+  } catch (err) {
+    console.error('Failed to continue project:', err);
+    alert('Unable to reach the server. Please try again.');
+    if (continueBtn) {
+      continueBtn.disabled = false;
+      continueBtn.textContent = 'Continue →';
+    }
+  }
+}
+
 function attachCardHandlers(projects) {
   document.querySelectorAll('[data-toggle-summary]').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -174,6 +260,18 @@ function attachCardHandlers(projects) {
       const isHidden = panel.classList.contains('hidden');
       panel.classList.toggle('hidden');
       btn.textContent = isHidden ? 'Hide Summary' : 'View Summary';
+    });
+  });
+
+  document.querySelectorAll('[data-continue-trigger]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const card = btn.closest('.dsh-card');
+      const projectId = card.getAttribute('data-project-id');
+      const project = projects.find((p) => String(p.id) === String(projectId));
+      const nextStep = project ? nextStepInfo(project) : null;
+      if (nextStep) {
+        continueProject(projectId, nextStep.targetPage);
+      }
     });
   });
 
@@ -193,7 +291,7 @@ function attachCardHandlers(projects) {
         </div>
       `;
 
-            actions.querySelector('[data-confirm-yes]').addEventListener('click', async () => {
+      actions.querySelector('[data-confirm-yes]').addEventListener('click', async () => {
         const yesBtn = actions.querySelector('[data-confirm-yes]');
         if (yesBtn) yesBtn.disabled = true;
         try {

@@ -209,6 +209,29 @@
   background: var(--vrx-bad-bg);
 }
 
+/* ---------- continue-analysis button (incomplete projects) ---------- */
+.dsh-btn-continue {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  border: 1px solid #FCEAC1;
+  background: var(--vrx-warn-bg);
+  color: var(--vrx-warn);
+  text-align: center;
+}
+
+.dsh-btn-continue:hover {
+  background: #FCEAC1;
+}
+
+.dsh-btn-continue:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 /* ---------- inline two-step delete confirm ---------- */
 .dsh-confirm-row {
   display: flex;
