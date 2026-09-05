@@ -5,23 +5,51 @@
 // button that turns .navbar-links into a dropdown menu. Desktop layout is
 // untouched — the hamburger only renders below the 960px breakpoint via CSS.
 //
-// The hamburger button is placed INSIDE .navbar-right, immediately before
-// whatever's rendered there (avatar or login/signup), rather than as a
-// sibling of .navbar-right. With only 3 top-level flex children and
-// justify-content: space-between, a sibling hamburger got shoved into the
-// middle of the navbar instead of hugging the profile controls. Because
-// renderLoggedIn/renderLoggedOut replace .navbar-right's innerHTML, the
-// hamburger is re-inserted as the first child every time those run.
+// Performance note: the /api/auth/me check is cached in sessionStorage for
+// a short window so navigating across the 4-step analysis flow (Input ->
+// Market -> Risk -> Recommendations) doesn't refetch the same auth check
+// on every single page load.
 
 (function () {
+  const AUTH_CACHE_KEY = 'veridexAuthCache';
+  const AUTH_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+  function getCachedUser() {
+    try {
+      const raw = sessionStorage.getItem(AUTH_CACHE_KEY);
+      if (!raw) return undefined;
+      const { user, ts } = JSON.parse(raw);
+      if (Date.now() - ts > AUTH_CACHE_TTL_MS) return undefined;
+      return user; // may be null (cached "logged out") or a user object
+    } catch (err) {
+      return undefined;
+    }
+  }
+
+  function setCachedUser(user) {
+    try {
+      sessionStorage.setItem(AUTH_CACHE_KEY, JSON.stringify({ user, ts: Date.now() }));
+    } catch (err) {
+      // sessionStorage unavailable (rare) — just skip caching, no functional impact
+    }
+  }
+
   async function fetchCurrentUser() {
+    const cached = getCachedUser();
+    if (cached !== undefined) return cached;
+
     try {
       const res = await fetch('/api/auth/me', { credentials: 'same-origin' });
-      if (!res.ok) return null;
+      if (!res.ok) {
+        setCachedUser(null);
+        return null;
+      }
       const data = await res.json();
-      return data.success ? data.user : null;
+      const user = data.success ? data.user : null;
+      setCachedUser(user);
+      return user;
     } catch (err) {
-      return null;
+      return null; // network failure: don't cache, so the next page retries fresh
     }
   }
 
@@ -69,6 +97,7 @@
         document.getElementById('confirmLogoutBtn').addEventListener('click', async (ev) => {
           ev.stopPropagation();
           await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
+          sessionStorage.removeItem(AUTH_CACHE_KEY);
           window.location.href = 'home.html';
         });
         document.getElementById('cancelLogoutBtn').addEventListener('click', (ev) => {

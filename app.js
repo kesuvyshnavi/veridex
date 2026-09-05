@@ -1,5 +1,6 @@
 // server/backend/app.js
 const express = require('express');
+const compression = require('compression');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 require('dotenv').config();
@@ -11,27 +12,35 @@ const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 
+// Gzip/brotli-negotiated compression for every response (JSON analysis
+// payloads, HTML, CSS, JS). Runs before routes so it covers both static
+// files and API responses.
+app.use(compression());
+
 app.use(express.json());
 app.use(cookieParser());
 
 // Serve static frontend (HTML, CSS, JS) from the "public" folder.
 //
-// Cache-Control: no-cache forces the browser to revalidate with the server
-// on every load instead of trusting its own disk cache blindly. Without
-// this, browsers apply heuristic caching to CSS/JS/HTML that have no
-// explicit cache header, which was causing stale (old) versions of the
-// UI to render first, then get swapped for the current version a moment
-// later once a background revalidation happened. Express still sends an
-// ETag automatically, so an unchanged file gets a fast 304 response
-// instead of being re-downloaded — this fixes the flash without making
-// pages noticeably slower.
+// Cache policy is split by file type:
+// - HTML: Cache-Control: no-cache — always revalidate with the server so
+//   deploys show up immediately (this is what fixed the earlier
+//   stale-UI-flash bug).
+// - CSS/JS/images: cached for 1 day with must-revalidate — repeat page
+//   navigations within a session skip re-downloading unchanged assets,
+//   while a real change is picked up automatically without needing
+//   manual cache busting or filename hashing.
 app.use(
   express.static(path.join(__dirname, 'public'), {
     index: false,
     etag: true,
     lastModified: true,
-    setHeaders: (res) => {
-      res.setHeader('Cache-Control', 'no-cache');
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-cache');
+      } else {
+        res.setHeader('Cache-Control', 'public, max-age=86400, must-revalidate');
+      }
     },
   })
 );

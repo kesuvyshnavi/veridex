@@ -3,7 +3,7 @@
 // Handles communication with the Groq API and provides a data-driven
 // fallback so the results page is ALWAYS fully populated for demos.
 
-const axios = require('axios');
+const { postJsonWithRetry } = require('./httpRetry');
 require('dotenv').config();
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
@@ -299,14 +299,15 @@ function normalizeAnalysisCurrency(analysis, currency) {
 }
 
 /**
- * Calls the Groq API and returns a parsed analysis object.
- * Throws an error if the API call fails or the response can't be parsed
- * (the caller, getMarketAnalysis, falls back to buildFallbackAnalysis).
+ * Calls the Groq API (with one automatic retry on failure) and returns a
+ * parsed analysis object. Throws an error if both attempts fail or the
+ * response can't be parsed (the caller, getMarketAnalysis, falls back to
+ * buildFallbackAnalysis).
  */
 async function callGroqAPI(projectData) {
   const prompt = buildPrompt(projectData);
 
-  const response = await axios.post(
+  const response = await postJsonWithRetry(
     GROQ_API_URL,
     {
       model: GROQ_MODEL,
@@ -314,11 +315,8 @@ async function callGroqAPI(projectData) {
       temperature: 0.4,
     },
     {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-      },
-      timeout: 30000,
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
     }
   );
 
@@ -349,9 +347,9 @@ async function callGroqAPI(projectData) {
 }
 
 /**
- * Always returns a complete, render-ready analysis object: tries Groq first,
- * and falls back to the deterministic data-driven generator if the live
- * call fails for any reason (network issue, rate limit, bad JSON, outage).
+ * Always returns a complete, render-ready analysis object: tries Groq first
+ * (with a retry), and falls back to the deterministic data-driven generator
+ * if both attempts fail (network issue, rate limit, bad JSON, outage).
  * Either way, the currency of marketSize.tam/sam/som is force-normalized
  * to match what the person actually selected in the form — the AI's
  * instruction-following on currency isn't 100% reliable, so we don't trust
@@ -362,7 +360,7 @@ async function getMarketAnalysis(projectData) {
   try {
     analysis = await callGroqAPI(projectData);
   } catch (err) {
-    console.error('⚠️ Groq analysis failed, using data-driven fallback:', err.message);
+    console.error('⚠️ Groq analysis failed after retry, using data-driven fallback:', err.message);
     analysis = buildFallbackAnalysis(projectData);
   }
   return normalizeAnalysisCurrency(analysis, projectData.currency);

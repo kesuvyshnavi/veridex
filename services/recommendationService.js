@@ -4,10 +4,10 @@
 // Analysis -> Strategic Reasoning -> Validation -> Report Generation.
 // Only the Strategic Reasoning node calls Groq (via @langchain/groq,
 // LangChain's chat-model wrapper) — every other node is deterministic.
-// Same reliability guarantee as aiService.js / riskService.js: if the live
-// Groq call fails, that node falls back to a data-driven generator instead
-// of leaving the workflow incomplete, and the failure is recorded in the
-// trace rather than hidden.
+// Same reliability guarantee as aiService.js / riskService.js: the
+// Strategic Reasoning node retries once on failure before falling back to
+// a data-driven generator, so the workflow is never left incomplete, and
+// the failure is recorded in the trace rather than hidden.
 
 const { StateGraph, Annotation, START, END } = require('@langchain/langgraph');
 const { ChatGroq } = require('@langchain/groq');
@@ -210,45 +210,55 @@ function buildFallbackRecommendations(ingested) {
 }
 
 // ---------- Node 3: Strategic Reasoning (calls Groq via LangGraph) ----------
+// Retries once on failure (transient network blip, brief rate limit) before
+// falling back to the deterministic generator — same reliability upgrade
+// applied to aiService.js and riskService.js.
 async function strategicReasoningNode(state) {
   const { ingested, riskSummary } = state;
   const prompt = buildPrompt(ingested, riskSummary);
 
-  try {
-    const model = new ChatGroq({
-      apiKey: process.env.GROQ_API_KEY,
-      model: GROQ_MODEL,
-      temperature: 0.4,
-    });
+  const model = new ChatGroq({
+    apiKey: process.env.GROQ_API_KEY,
+    model: GROQ_MODEL,
+    temperature: 0.4,
+  });
 
-    const response = await model.invoke(prompt);
-    const rawText = typeof response.content === 'string' ? response.content : JSON.stringify(response.content);
-    const parsed = JSON.parse(cleanJson(rawText));
+  for (let attempt = 0; attempt <= 1; attempt++) {
+    try {
+      const response = await model.invoke(prompt);
+      const rawText = typeof response.content === 'string' ? response.content : JSON.stringify(response.content);
+      const parsed = JSON.parse(cleanJson(rawText));
 
-    if (!Array.isArray(parsed.recommendations) || !Array.isArray(parsed.riskMitigation)) {
-      throw new Error('Groq response missing required arrays');
+      if (!Array.isArray(parsed.recommendations) || !Array.isArray(parsed.riskMitigation)) {
+        throw new Error('Groq response missing required arrays');
+      }
+
+      return {
+        recommendations: parsed,
+        isFallback: false,
+        trace: [
+          traceEntry(
+            'Strategic Reasoning',
+            'done',
+            'Groq (openai/gpt-oss-120b) generated recommendations and mitigation strategies.'
+          ),
+        ],
+      };
+    } catch (err) {
+      if (attempt === 0) {
+        // First failure: wait briefly and try once more before giving up.
+        await new Promise((resolve) => setTimeout(resolve, 800));
+        continue;
+      }
+      console.error('⚠️ Strategic Reasoning node: Groq call failed after retry, using data-driven fallback:', err.message);
+      return {
+        recommendations: buildFallbackRecommendations(ingested),
+        isFallback: true,
+        trace: [
+          traceEntry('Strategic Reasoning', 'warn', `Groq call failed (${err.message}); used deterministic fallback.`),
+        ],
+      };
     }
-
-    return {
-      recommendations: parsed,
-      isFallback: false,
-      trace: [
-        traceEntry(
-          'Strategic Reasoning',
-          'done',
-          'Groq (openai/gpt-oss-120b) generated recommendations and mitigation strategies.'
-        ),
-      ],
-    };
-  } catch (err) {
-    console.error('⚠️ Strategic Reasoning node: Groq call failed, using data-driven fallback:', err.message);
-    return {
-      recommendations: buildFallbackRecommendations(ingested),
-      isFallback: true,
-      trace: [
-        traceEntry('Strategic Reasoning', 'warn', `Groq call failed (${err.message}); used deterministic fallback.`),
-      ],
-    };
   }
 }
 

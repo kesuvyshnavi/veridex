@@ -11,8 +11,14 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   ssl: {
-  rejectUnauthorized: false,
-},
+    rejectUnauthorized: false,
+  },
+  // Pool tuning: caps concurrent connections against Supabase's limit,
+  // recycles idle connections instead of holding them open indefinitely,
+  // and fails fast on a dead/unreachable DB instead of hanging the request.
+  max: 10,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 5000,
 });
 
 // Quick sanity check when the server starts
